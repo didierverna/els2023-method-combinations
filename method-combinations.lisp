@@ -46,6 +46,63 @@ the combination again, regardless of the value of ERRORP."
 		   (sb-pcl::method-combination-info-cache info)))))
       (and errorp (error "No method combination named ~A." name))))
 
+;; The wording of the standard suggests that method combinations thingies
+;; (that is, what's defined by DEFINE-METHOD-COMBINATION) behave like
+;; parametric types. SBCL doesn't have an object-oriented representation for
+;; those (merely a METHOD-COMBINATION-INFO structure), but it would make sense
+;; to turn that into an OO hierarchy, in which case SBCL's method combination
+;; classes would need to be refined (for example, the OPTIONS slot in
+;; STANDARD-METHOD-COMBINATION is not nice). A new method combination type
+;; would become a subclass of SHORT/LONG-METHOD-COMBINATION, and specific uses
+;; with specific sets of arguments would become instances of those.
+
+;; In any case, in the current state of things, FIND-METHOD-COMBINATION[!] is
+;; closer to FIND-METHOD than to FIND-CLASS for instance, in that a name is
+;; not associated with a single method combination, but with a set of those
+;; (a METHOD-COMBINATION-INFO structure). So it doesn't make sense to
+;; implement a SETF method for it.
+
+
+;; ----------------------------
+;; Method combinations updating
+;; ----------------------------
+
+;; SBCL has an UPDATE-MCS function which it calls whenever a method
+;; combination type is created or redefined. In case of a redefinition, this
+;; function transfers the old cache to the new info structure, and then
+;; updates the existing method combination instances by calling CHANGE-CLASS
+;; on them (as I did in the ELS 2018 version), and invalidates all associated
+;; generic functions. This is essentially what the "Clients management"
+;; section of my previous work did.
+
+;; One improvement we can make here is move the generic functions invalidation
+;; code to an UPDATE-INSTANCE-FOR-DIFFERENT-CLASS method on method
+;; combinations.
+
+(defmethod update-instance-for-different-class :after
+  ((previous sb-pcl::standard-method-combination)
+   (current sb-pcl::standard-method-combination)
+   &key &allow-other-keys)
+  (maphash (lambda (gf ignore)
+             (declare (ignore ignore))
+             (sb-pcl::flush-effective-method-cache gf)
+             (reinitialize-instance gf))
+	   (sb-pcl::method-combination-%generic-functions current)))
+
+(sb-ext:with-unlocked-packages (sb-pcl)
+  (defun sb-pcl::update-mcs (name new old frobmc)
+    (setf (gethash name sb-pcl::**method-combinations**) new)
+    ;; for correctness' sake we should probably lock **METHOD-COMBINATIONS**
+    ;; while we're updating things, to defend against defining gfs in one
+    ;; thread while redefining the method combination in another thread.
+    (when old
+      (setf (sb-pcl::method-combination-info-cache new)
+	    (sb-pcl::method-combination-info-cache old))
+      (setf (sb-pcl::method-combination-info-cache old) nil)
+      (dolist (entry (sb-pcl::method-combination-info-cache new))
+	(funcall frobmc (cdr entry))))))
+
+
 
 ;; =======================================
 ;; Build-In Long-Short Method Combinations
