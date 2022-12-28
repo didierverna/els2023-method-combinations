@@ -9,7 +9,7 @@
 	   :generic-function! :generic-function!-p :defgeneric!
 	   :call-with-combination :call/cb :install-#!-reader-macro))
 
-(in-package :els2023-standalone-methods)
+(in-package :els2023-method-combinations)
 
 
 ;; =========================
