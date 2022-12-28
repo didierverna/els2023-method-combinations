@@ -1,4 +1,4 @@
-(defpackage :els2023-standalone-methods
+(defpackage :els2023-method-combinations
   (:use :cl)
   (:import-from :sb-mop
     :funcallable-standard-class
