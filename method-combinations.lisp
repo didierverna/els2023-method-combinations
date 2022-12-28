@@ -12,10 +12,21 @@
 (in-package :els2023-method-combinations)
 
 
-;; =========================
-;; Method Combination Access
-;; =========================
+;; ===================
+;; Method Combinations
+;; ===================
 
+;; Post ELS 2018, we don't need method combinators anymore, as SBCL correctly
+;; handles generic functions and method combinations updates. The current
+;; implementation still leaves room for improvement however. See comment
+;; below.
+
+;; -------------------------
+;; Method combination access
+;; -------------------------
+
+;; A better protocol to access method combination objects. This is merely a
+;; duplication of SBCL's code for the original FIND-METHOD-COMBINATION.
 (defun find-method-combination!
     (name &optional options (errorp t)
 	  &aux (info (gethash name sb-pcl::**method-combinations**)))
