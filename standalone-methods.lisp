@@ -1,12 +1,8 @@
 (defpackage :els2023-standalone-methods
   (:use :cl)
-  (:import-from #+sbcl :sb-mop
-		:funcallable-standard-class
-		:generic-function-method-combination)
-  (:import-from #+sbcl :sb-pcl
-		:**method-combinations**
-		:method-combination-info-cache
-		:method-combination-info-constructor)
+  (:import-from :sb-mop
+    :funcallable-standard-class
+    :generic-function-method-combination)
   (:export :find-method-combination!
 	   :define-long-short-method-combination
 	   :+! :*! :max! :min! :nconc! :progn! :and! :or! :list! :append!
@@ -22,20 +18,21 @@
 
 (defun find-method-combination!
     (name &optional options (errorp t)
-	  &aux (info (gethash name **method-combinations**)))
-  "Find a method combination by NAME and OPTIONS.
-If ERRORP (the default), throw an error if no NAMEd combination is found.
-Otherwise, return NIL. Note that when a NAMEd combination exists, asking for a
-new set of (conformant) OPTIONS will always instantiate the combination again,
-regardless of the value of ERRORP."
+	  &aux (info (gethash name sb-pcl::**method-combinations**)))
+  "Find a method combination object for NAME and OPTIONS.
+If ERRORP (the default), throw an error if no NAMEd method combination type is
+found. Otherwise, return NIL. Note that when a NAMEd method combination type
+exists, asking for a new set of (conformant) OPTIONS will always instantiate
+the combination again, regardless of the value of ERRORP."
   (or (when info
-	(or (cdr (assoc options (method-combination-info-cache info)
+	(or (cdr (assoc options (sb-pcl::method-combination-info-cache info)
 			:test #'equal))
 	    (cdar (push
 		   (cons options
-			 (funcall (method-combination-info-constructor info)
+			 (funcall
+			     (sb-pcl::method-combination-info-constructor info)
 			   options))
-		   (method-combination-info-cache info)))))
+		   (sb-pcl::method-combination-info-cache info)))))
       (and errorp (error "No method combination named ~A." name))))
 
 
@@ -166,7 +163,7 @@ missing."
 	  (setq values
 		(multiple-value-list (apply generic-function arguments))
 		function
-		(#+sbcl sb-kernel::%funcallable-instance-fun generic-function))
+		(sb-kernel::%funcallable-instance-fun generic-function))
 	  (reinitialize-instance generic-function
 	    :method-combination default-combination)
 	  (setf (gethash combination (functions generic-function))
