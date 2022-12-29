@@ -7,6 +7,7 @@
 	   :define-long-short-method-combination
 	   :+! :*! :max! :min! :nconc! :progn! :and! :or! :list! :append!
 	   :generic-function! :generic-function!-p :defgeneric!
+	   :change-method-combination
 	   :call-with-combination :call/cb :install-#!-reader-macro))
 
 (in-package :els2023-method-combinations)
@@ -200,6 +201,25 @@ missing."
 (defmacro defgeneric! (name lambda-list &body options)
   "Wrapper around DEFGENERIC for creating extended generic functions."
   `(defgeneric ,name ,lambda-list ,@(process-defgeneric!-options options)))
+
+
+;; -------------------------
+;; Method combination change
+;; -------------------------
+
+;; #### FIXME: this is not enough. We need to check extended generic functions
+;; for cached discriminating functions related to the change.
+
+(defmacro change-method-combination (function &rest combination)
+  "Change generic FUNCTION to a new method COMBINATION.
+- FUNCTION is a generic function designator.
+- COMBINATION is a method combination type name, potentially followed by
+arguments."
+  (when (symbolp function)
+    (setq function `(function ,function)))
+  `(reinitialize-instance ,function
+     :method-combination
+     (find-method-combination! ',(car combination) ',(cdr combination))))
 
 
 ;; ----------------------------------------

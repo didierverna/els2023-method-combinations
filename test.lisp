@@ -45,13 +45,13 @@
   (assert-equal 11   (call/cb +! gf 5))
   (assert-equal  5.0 (call/cb +! gf 5.0))
 
-  ;;(change-method-combination #'gf min!)
-  ;;(assert-equal 5 (gf 5))
-  ;;(assert-equal 5.0 (gf 5.0))
+  (change-method-combination gf min!)
+  (assert-equal 5 (gf 5))
+  (assert-equal 5.0 (gf 5.0))
 
-  ;;(change-method-combination #'gf max!)
-  ;;(assert-equal 6 (gf 5))
-  ;;(assert-equal 5.0 (gf 5.0))
+  (change-method-combination gf max!)
+  (assert-equal 6 (gf 5))
+  (assert-equal 5.0 (gf 5.0))
 
   ;; Make sure previous calls are undisturbed.
   (assert-equal 11   (call/cb +! gf 5))
