@@ -207,8 +207,27 @@ missing."
 ;; Method combination change
 ;; -------------------------
 
-;; #### FIXME: this is not enough. We need to check extended generic functions
-;; for cached discriminating functions related to the change.
+;; #### NOTE: normally, we would like to do this in a before method, but SBCL
+;; defines an around method on generic functions, notably with two assertions
+;; checking that a generic function is not referenced by two different method
+;; combinations at the same time, which would break for alternative method
+;; combinations. Hence, we need to do the cleanup below first, in an around
+;; method of our own. The reason SBCL does this in an around method is that it
+;; compares the previous and the next method combinations, which couldn't be
+;; done in before/after methods, as they would miss half of the required
+;; information.
+(defmethod reinitialize-instance :around
+    ((function generic-function!)
+     &key (method-combination nil method-combination-p) &allow-other-keys)
+  "Remove potential trace of a new method combination as an alternative one."
+  (when (and method-combination-p
+	     (not (eq method-combination
+		      (generic-function-method-combination function))))
+    (remhash method-combination (functions function))
+    (sb-pcl::remove-from-weak-hashset
+     function
+     (sb-pcl::method-combination-%generic-functions method-combination)))
+  (call-next-method))
 
 (defmacro change-method-combination (function &rest combination)
   "Change generic FUNCTION to a new method COMBINATION.
@@ -282,6 +301,9 @@ discriminating function."
 	  (reinitialize-instance function
 	    :method-combination default-combination)
 	  (setf (gethash combination (functions function)) alternative)
+	  (sb-pcl::add-to-weak-hashset
+	   function
+	   (sb-pcl::method-combination-%generic-functions combination))
 	  (values-list values))))))
 
 (defmacro call/cb (combination function &rest arguments)
