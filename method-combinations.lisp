@@ -85,8 +85,8 @@ the combination again, regardless of the value of ERRORP."
    &key &allow-other-keys)
   (maphash (lambda (gf ignore)
              (declare (ignore ignore))
-             (sb-pcl::flush-effective-method-cache gf)
-             (reinitialize-instance gf))
+	     (update-generic-function-for-redefined-method-combination
+	      gf current))
 	   (sb-pcl::method-combination-%generic-functions current)))
 
 (sb-ext:with-unlocked-packages (sb-pcl)
@@ -101,6 +101,10 @@ the combination again, regardless of the value of ERRORP."
       (setf (sb-pcl::method-combination-info-cache old) nil)
       (dolist (entry (sb-pcl::method-combination-info-cache new))
 	(funcall frobmc (cdr entry))))))
+
+;; Also, method combination objects are low-level and should only be
+;; manipulated by SBCL's internals, so it's not worth implementing anything
+;; special for REINITIALIZE-INSTANCE.
 
 
 
@@ -196,6 +200,37 @@ missing."
 (defmacro defgeneric! (name lambda-list &body options)
   "Wrapper around DEFGENERIC for creating extended generic functions."
   `(defgeneric ,name ,lambda-list ,@(process-defgeneric!-options options)))
+
+
+;; ----------------------------------------
+;; Method combination redefinition handling
+;; ----------------------------------------
+
+(defgeneric update-generic-function-for-redefined-method-combination
+    (generic-function method-combination)
+  (:documentation
+   "Inform GENERIC-FUNCTION that METHOD-COMBINATION was redefined.")
+  (:method ((generic-function generic-function) method-combination)
+    "Method for standard generic functions.
+This method flushes the effective method cache and reinitializes the generic
+function."
+    ;; This is just what SBCL does.
+    (sb-pcl::flush-effective-method-cache generic-function)
+    (reinitialize-instance generic-function))
+  (:method ((generic-function generic-function!) method-combination)
+    "Method for extended generic functions.
+Either fall back to the default behavior when METHOD-COMBINATION is
+GENERIC-FUNCTION's regular method combination, or invalidate the corresponding
+cached discriminating function."
+    (if (eq method-combination
+	    (generic-function-method-combination generic-function))
+      (call-next-method)
+      ;; #### FIXME: do we need this or not ? It doesn't seem to affect the
+      ;; tests and I don't currently understand SBCL's effective method
+      ;; caches.
+      ;; (sb-pcl::flush-effective-method-cache generic-function)
+      (remhash method-combination (functions generic-function)))))
+
 
 ;; ------------------------
 ;; Alternative combinations
