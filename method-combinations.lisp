@@ -215,8 +215,7 @@ missing."
 - FUNCTION is a generic function designator.
 - COMBINATION is a method combination type name, potentially followed by
 arguments."
-  (when (symbolp function)
-    (setq function `(function ,function)))
+  (when (symbolp function) (setq function `(function ,function)))
   `(reinitialize-instance ,function
      :method-combination
      (find-method-combination! ',(car combination) ',(cdr combination))))
@@ -227,29 +226,25 @@ arguments."
 ;; ----------------------------------------
 
 (defgeneric update-generic-function-for-redefined-method-combination
-    (generic-function method-combination)
+    (function combination)
   (:documentation
-   "Inform GENERIC-FUNCTION that METHOD-COMBINATION was redefined.")
-  (:method ((generic-function generic-function) method-combination)
-    "Method for standard generic functions.
-This method flushes the effective method cache and reinitializes the generic
-function."
+   "Inform generic FUNCTION that method COMBINATION was redefined.")
+  (:method ((function generic-function) combination)
+    "Flush the effective method cache and reinitialize FUNCTION."
     ;; This is just what SBCL does.
-    (sb-pcl::flush-effective-method-cache generic-function)
-    (reinitialize-instance generic-function))
-  (:method ((generic-function generic-function!) method-combination)
-    "Method for extended generic functions.
-Either fall back to the default behavior when METHOD-COMBINATION is
-GENERIC-FUNCTION's regular method combination, or invalidate the corresponding
-cached discriminating function."
-    (if (eq method-combination
-	    (generic-function-method-combination generic-function))
+    (sb-pcl::flush-effective-method-cache function)
+    (reinitialize-instance function))
+  (:method ((function generic-function!) combination)
+    "Either fall back to the default behavior when COMBINATION is FUNCTION's
+regular method combination, or invalidate the corresponding cached
+discriminating function." 
+    (if (eq combination (generic-function-method-combination function))
       (call-next-method)
       ;; #### FIXME: do we need this or not ? It doesn't seem to affect the
       ;; tests and I don't currently understand SBCL's effective method
       ;; caches.
-      ;; (sb-pcl::flush-effective-method-cache generic-function)
-      (remhash method-combination (functions generic-function)))))
+      ;; (sb-pcl::flush-effective-method-cache function)
+      (remhash combination (functions function)))))
 
 
 ;; ------------------------
@@ -257,52 +252,48 @@ cached discriminating function."
 ;; ------------------------
 
 (defmethod add-method :after
-    ((generic-function generic-function!) method)
+    ((function generic-function!) method)
   "Invalidate all cached discriminating functions."
-  (clrhash (functions generic-function)))
+  (clrhash (functions function)))
 
 (defmethod remove-method :after
-    ((generic-function generic-function!) method)
+    ((function generic-function!) method)
   "Invalidate all cached discriminating functions."
-  (clrhash (functions generic-function)))
+  (clrhash (functions function)))
 
 (defun call-with-combination
-    (combination generic-function
+    (combination function
      &rest arguments
-     &aux (default-combination
-	   (generic-function-method-combination generic-function)))
-  "Call GENERIC-FUNCTION on ARGUMENTS with alternative method COMBINATION."
+     &aux (default-combination (generic-function-method-combination function)))
+  "Call generic FUNCTION on ARGUMENTS with alternative method COMBINATION."
   (if (eq combination default-combination)
-    (apply generic-function arguments)
-    (let ((function (gethash combination (functions generic-function))))
-      (if function
-	(apply function arguments)
+    (apply function arguments)
+    (let ((alternative (gethash combination (functions function))))
+      (if alternative
+	(apply alternative arguments)
 	(let (values)
 	  ;; #### TODO: by digging a bit deeper into the implementation, it
 	  ;; may be possible to do better (and faster) than using
 	  ;; REINITIALIZE-INSTANCE twice like that. The potential gain may not
 	  ;; be worth it however.
-	  (reinitialize-instance generic-function
-	    :method-combination combination)
-	  (setq values
-		(multiple-value-list (apply generic-function arguments))
-		function
-		(sb-kernel::%funcallable-instance-fun generic-function))
-	  (reinitialize-instance generic-function
+	  (reinitialize-instance function :method-combination combination)
+	  (setq values (multiple-value-list (apply function arguments))
+		alternative (sb-kernel::%funcallable-instance-fun function))
+	  (reinitialize-instance function
 	    :method-combination default-combination)
-	  (setf (gethash combination (functions generic-function))
-		function)
+	  (setf (gethash combination (functions function)) alternative)
 	  (values-list values))))))
 
-(defmacro call/cb (combination generic-function &rest arguments)
-  "Call GENERIC-FUNCTION on ARGUMENTS with alternative method COMBINATION.
-- GENERIC-FUNCTION is a generic function name.
+(defmacro call/cb (combination function &rest arguments)
+  "Call generic FUNCTION on ARGUMENTS with alternative method COMBINATION.
 - COMBINATION is a method combination type name or a list of a method
-  combination type name, potentially followed by arguments."
+  combination type name, potentially followed by arguments.
+- FUNCTION is a generic function designator."
   (unless (consp combination) (setq combination (list combination)))
+  (when (symbolp function) (setq function `(function ,function)))
   `(call-with-combination
     (find-method-combination! ',(car combination) ',(cdr combination))
-    (function ,generic-function)
+    ,function
     ,@arguments))
 
 (defun install-#!-reader-macro ()
