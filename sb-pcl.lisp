@@ -99,6 +99,14 @@ combination class."))
 Short method combinations can only have two instances: one for each method
 order."))
 
+(defmethod short-combination-operator ((combination short-method-combination))
+  (short-method-combination-type-operator (class-of combination)))
+
+(defmethod short-combination-identity-with-one-argument
+    ((combination short-method-combination))
+  (short-method-combination-type-identity-with-one-argument
+   (class-of combination)))
+
 (defmethod initialize-instance :before
     ((instance short-method-combination)
      &key options &allow-other-keys
@@ -202,6 +210,12 @@ method combination."))
   (define-method-combination nconc  :identity-with-one-argument t)
   (define-method-combination or     :identity-with-one-argument t)
   (define-method-combination progn  :identity-with-one-argument t))
+
+(defmethod compute-effective-method
+    ((function generic-function)
+     (combination short-method-combination)
+     applicable-methods)
+  (short-compute-effective-method function combination applicable-methods))
 
 
 
