@@ -36,6 +36,12 @@ It is the base class for short and long method combination types meta-classes.
 This only class directly implemented as this class is the standard method
 combination class."))
 
+(defmethod print-object ((type method-combination-type) stream)
+  (print-unreadable-object (type stream :type t :identity t)
+    (format stream "~S ~S"
+      (slot-value-for-printing type 'name)
+      (slot-value-for-printing type 'lambda-list))))
+
 ;; Validate the creation of subclasses of METHOD-COMBINATION implemented as
 ;; METHOD-COMBINATION-TYPE.
 (defmethod validate-superclass
