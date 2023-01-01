@@ -88,10 +88,25 @@ combination class."))
 ;; -------------------------
 
 (defclass short-method-combination (standard-method-combination)
-  ((options :initform '(:most-specific-first)))
+  ()
   (:documentation "Base class for short method combinations.
 Short method combinations can only have two instances: one for each method
 order."))
+
+(defmethod initialize-instance :before
+    ((instance short-method-combination)
+     &key options &allow-other-keys
+     &aux (name (class-name (class-of (class-of instance)))))
+  (when (cdr options)
+    (method-combination-error
+     "Illegal options to the ~S short method combination.~%~
+      Short method combinations accept a single ORDER argument."
+     name))
+  (unless (member (car options) '(:most-specific-first :most-specific-last))
+    (method-combination-error
+     "Illegal ORDER option to the ~S short method combination.~%~
+      ORDER must be either :MOST-SPECIFIC-FIRST or :MOST-SPECIFIC-LAST."
+     name)))
 
 (defun load-short-defcombin
     (name operator identity-with-one-argument documentation source-location)
