@@ -138,6 +138,18 @@ order."))
 ;; Infrastructure Population
 ;; =========================
 
+;; #### NOTE: from SBCL's original METHOD-COMBINATION-INFO structure, it's
+;; impossible (or extremely difficult to figure out whether a method
+;; combination would be short or long: the cache could tell us, but it may be
+;; empty; the lambda-list could hint us, but even a long method combination
+;; could use a lambda-list looking like a short one... Consequently, we will
+;; simply re-create the standard and built-in ones here (which is what would
+;; happen anyway if this was actually part of SBCL). This is why this code
+;; must be loaded as early as possible.
+
+;; We will, however, scan all these combinations and recreate the caches.
+
+
 ;; ---------------------------
 ;; Standard method combination
 ;; ---------------------------
@@ -159,17 +171,31 @@ method combination."))
 	  (when options
 	    (method-combination-error
 	     "The standard method combination accepts no options."))
-	  *standard-method-combination*))
+	  instance))
   (setf (gethash nil (method-combination-type-%cache class)) instance)
   (setf (gethash 'standard **method-combination-types**) class))
 
 (defmethod compute-effective-method
-  ((generic-function generic-function)
-   (method-combination standard-standard-method-combination)
-   applicable-methods)
-  (standard-compute-effective-method
-   generic-function method-combination applicable-methods))
+    ((function generic-function)
+     (combination standard-standard-method-combination)
+     applicable-methods)
+  (standard-compute-effective-method function combination applicable-methods))
 
+
+;; ------------------------------------
+;; Built-in (short) method combinations
+;; ------------------------------------
+
+(with-unlocked-packages (cl)
+  (define-method-combination +      :identity-with-one-argument t)
+  (define-method-combination and    :identity-with-one-argument t)
+  (define-method-combination append :identity-with-one-argument nil)
+  (define-method-combination list   :identity-with-one-argument nil)
+  (define-method-combination max    :identity-with-one-argument t)
+  (define-method-combination min    :identity-with-one-argument t)
+  (define-method-combination nconc  :identity-with-one-argument t)
+  (define-method-combination or     :identity-with-one-argument t)
+  (define-method-combination progn  :identity-with-one-argument t))
 
 
 
@@ -177,22 +203,47 @@ method combination."))
 ;; New Infrastructure Injection
 ;; ============================
 
-;; ---------------------------
-;; Standard method combination
-;; ---------------------------
+;; -------------------------------------
+;; Caches and generic functions updating
+;; -------------------------------------
 
-(let ((instance (gethash nil
-			 (method-combination-type-%cache
-			  (gethash 'standard **method-combination-types**)))))
-  (setf (slot-value instance '%generic-functions)
-	;; This is still the old architecture, so the old method !
-	(method-combination-%generic-functions *standard-method-combination*))
+(defun transfer-cache-and-update-generic-functions (new old)
+  (setf (slot-value new '%generic-functions)
+	;; This is still the old architecture, so the old method! Also, the
+	;; global variable below still contains the old value so it's quicker
+	;; to access it like that than going through the info structure's
+	;; cache.
+	(method-combination-%generic-functions old))
   (maphash (lambda (gf ignore)
 	     (declare (ignore ignore))
-	     (setf (generic-function-method-combination gf) instance))
+	     (setf (generic-function-method-combination gf) new))
 	   ;; This, on the other hand, is the new method.
-	   (method-combination-%generic-functions instance))
-  (setq *standard-method-combination* instance))
+	   (method-combination-%generic-functions new)))
+
+
+;; Standard method combination
+;; Remember that we have already created the only instance of the standard
+;; method combination. So we just need to repopulate its cache and update the
+;; concerned generic functions.
+(let ((combination
+	(gethash nil (method-combination-type-%cache
+		      (gethash 'standard **method-combination-types**)))))
+  (transfer-cache-and-update-generic-functions
+   combination *standard-method-combination*)
+  (setq *standard-method-combination* combination))
+
+;; Built-in method combinations
+(dolist (name '(+ and append list max min nconc or progn))
+  (let ((type (gethash name **method-combination-types**)))
+    (dolist (entry (method-combination-info-cache
+		    (gethash name **method-combinations**)))
+      (let ((combination
+	      (funcall (method-combination-%constructor type) (car entry))))
+	(setf (gethash (car entry) (method-combination-type-%cache type))
+	      combination)
+	(transfer-cache-and-update-generic-functions
+	 combination (cdr entry))))))
+
 
 ;; #### WARNING: until now, we were still running on the old infrastructure,
 ;; which was ok for adding new classes and methods and stuff. Now we still
