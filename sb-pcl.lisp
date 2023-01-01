@@ -74,15 +74,14 @@ The only concrete subclass of this class is the standard (standard) method
 combination class."))
 
 (defmethod method-combination-type-name
-    ((method-combination standard-method-combination))
-  (class-name (class-of method-combination)))  
+    ((combination standard-method-combination))
+  (class-name (class-of combination)))  
 
-(defmethod print-object
-((method-combination standard-method-combination) stream)
-  (print-unreadable-object (method-combination stream :type t :identity t)
+(defmethod print-object ((combination standard-method-combination) stream)
+  (print-unreadable-object (combination stream :type t :identity t)
     (format stream "~S ~:S"
-      (slot-value-for-printing (class-of method-combination) 'name)
-      (slot-value-for-printing method-combination 'options))))
+      (slot-value-for-printing (class-of combination) 'name)
+      (slot-value-for-printing combination 'options))))
 
 
 ;; Short method combinations
