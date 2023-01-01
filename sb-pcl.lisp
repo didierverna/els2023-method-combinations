@@ -130,6 +130,8 @@ order."))
   (setf (random-documentation name 'method-combination) documentation)
   name)
 
+(fmakunbound 'short-combine-methods)
+
 
 
 ;; =========================
