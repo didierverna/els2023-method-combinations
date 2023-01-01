@@ -251,23 +251,13 @@ method combination."))
 
 (defun method-combination-p (object) (typep object 'method-combination))
 
-
-
-#+()(defmethod find-method-combination
+(defmethod find-method-combination
     ((generic-function generic-function) name options)
   (let ((type (gethash name **method-combination-types**)))
     (when type
-      (or (gethash options (method-combination-type-cache type))
-	  (setf (gethash options (method-combination-type-cache type))
-		(funcall (method-combination-type-constructor type)
+      (or (gethash options (method-combination-type-%cache type))
+	  (setf (gethash options (method-combination-type-%cache type))
+		(funcall (method-combination-%constructor type)
 		  options))))))
-
-#+()(defmethod initialize-instance :before
-    ((instance short-method-combination) &key order &allow-other-keys)
-  (unless (member order '(:most-specific-first :most-specific-last))
-    (sb-pcl::method-combination-error
-     "Illegal ORDER option to the ~S short method combination.~%~
-      ORDER must be either :MOST-SPECIFIC-FIRST or :MOST-SPECIFIC-LAST."
-     (method-combination-type-name (class-of (class-of instance))))))
 
 ;;; sb-pcl.lisp ends here
