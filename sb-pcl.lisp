@@ -122,13 +122,8 @@ order."))
 		   :documentation documentation
 		   :constructor
 		   (lambda (options)
-		     (when (cdr options)
-		       (method-combination-error
-			"Illegal options to the ~S short method combination.~%~
-                         Short method combinations accept a single ORDER argument."
-			name))
-		     (when options (push :order options))
-		     (apply #'make-instance class options))
+		     (funcall #'make-instance
+		       class :options (or options '(:most-specific-first))))
 		   :operator operator
 		   :identity-with-one-argument identity-with-one-argument))
 	   (setf (gethash name **method-combination-types**) class))))
