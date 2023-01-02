@@ -84,6 +84,11 @@ combination class."))
     ()
     (:documentation "Base class for method combinations.")))
 
+;; #### NOTE: SBCL normally has the equivalent of this class instantiated
+;; once, and also serving as a base class for other method combinations, but I
+;; don't like that. I prefer to make the standard method combination behave as
+;; the other ones, in other words, to have its own class implemented as a
+;; method-combination-type.
 (defclass standard-method-combination (method-combination)
   ((options :initform nil
 	    :initarg :options
@@ -113,11 +118,17 @@ combination class."))
 ;; Short method combinations
 ;; -------------------------
 
+;; #### NOTE: in principle, short method combinations would only have at most
+;; two different instances, because the only possible choice for options is
+;; :MOST-SPECIFIC-FIRST or :MOST-SPECIFIC-LAST. However, the caches keep track
+;; of the options provided by the programmer (it's nice because it's
+;; informative). As a result, if the method combination is used without any
+;; argument, or explicitly with :MOST-SPECIFIC-FIRST, we will end up with 2
+;; different yet identical instances (so possibly 3 in total if
+;; :MOST-SPECIFIC-LAST appears as well). Not such a big deal.
 (defclass short-method-combination (standard-method-combination)
   ()
-  (:documentation "Base class for short method combinations.
-Short method combinations can only have two instances: one for each method
-order."))
+  (:documentation "Base class for short method combinations."))
 
 ;; #### NOTE: in SBCL, accessor names are inconsistent. Short ones are called
 ;; SHORT-COMBINATION-... whereas long ones are called
