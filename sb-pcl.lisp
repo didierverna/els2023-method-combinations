@@ -116,6 +116,12 @@ order."))
   (short-method-combination-type-identity-with-one-argument
    (class-of combination)))
 
+(defmethod compute-effective-method
+    ((function generic-function)
+     (combination short-method-combination)
+     applicable-methods)
+  (short-compute-effective-method function combination applicable-methods))
+
 (defmethod initialize-instance :before
     ((instance short-method-combination)
      &key options &allow-other-keys
@@ -131,6 +137,7 @@ order."))
       ORDER must be either :MOST-SPECIFIC-FIRST or :MOST-SPECIFIC-LAST."
      name)))
 
+;; Replacement for both load-short-defcombin and short-combine-methods.
 (defun load-short-defcombin
     (name operator identity-with-one-argument documentation source-location)
   (let ((class (gethash name **method-combination-types**)))
@@ -152,8 +159,6 @@ order."))
 	   (setf (gethash name **method-combination-types**) class))))
   (setf (random-documentation name 'method-combination) documentation)
   name)
-
-(fmakunbound 'short-combine-methods)
 
 
 
@@ -177,8 +182,11 @@ order."))
 ;; Standard method combination
 ;; ---------------------------
 
-;; This one is created by hand and globally registered because we need to
-;; specialize methods on it.
+;; #### WARNING: we work with CLOS layer 1 (the macro level) below because
+;; it's much simpler to create the specialization of COMPUTE-EFFECTIVE-METHOD
+;; this way. The unfortunate side effect of that is that the class below is
+;; defined globally, which I don't really want (all other concrete method
+;; combination classes are anonymous; even the built-in short ones).
 (defclass standard-standard-method-combination (standard-method-combination)
   ()
   (:metaclass method-combination-type)
@@ -220,17 +228,21 @@ method combination."))
   (define-method-combination or     :identity-with-one-argument t)
   (define-method-combination progn  :identity-with-one-argument t))
 
-(defmethod compute-effective-method
-    ((function generic-function)
-     (combination short-method-combination)
-     applicable-methods)
-  (short-compute-effective-method function combination applicable-methods))
 
 
+;; ========================
+;; Infrastructure Injection
+;; ========================
 
-;; ============================
-;; New Infrastructure Injection
-;; ============================
+;; At that point, we have recreated everything, and the new infrastructure
+;; exists in parallel with the old one which is still in use. We now need to
+;; switch to the new infrastructure, which means populating caches and
+;; updating all the existing generic functions. This is extremely dangerous
+;; because the code doing it involves generic calls, which in turn could
+;; trigger the computation of effective methods, which in turn would run the
+;; method combination infrastructure that we're precisely in the process of
+;; transferring...
+
 
 ;; -------------------------------------
 ;; Caches and generic functions updating
@@ -261,6 +273,8 @@ method combination."))
    combination *standard-method-combination*)
   (setq *standard-method-combination* combination))
 
+;; If we reach that point, we're mostly safe.
+
 ;; Built-in method combinations
 (dolist (name '(+ and append list max min nconc or progn))
   (let ((type (gethash name **method-combination-types**)))
@@ -274,9 +288,12 @@ method combination."))
 	 combination (cdr entry))))))
 
 
-;; #### WARNING: until now, we were still running on the old infrastructure,
-;; which was ok for adding new classes and methods and stuff. Now we still
-;; have a couple of things to rewrite.
+;; ------------------
+;; Late redefinitions
+;; ------------------
+
+;; At that point, the new infrastructure is in place. We still have a number
+;; of redefinitions to perform.
 
 (defun method-combination-p (object) (typep object 'method-combination))
 
