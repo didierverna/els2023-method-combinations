@@ -25,8 +25,13 @@ This hash table maps names to method combination types.")
 
 ;; Replacements for the method-combination-info structure.
 
+;; #### WARNING: trying to hijack the NAME slot in anonymous class metaobjects
+;; (that is, classes that are not meant to be registered globally) is
+;; dangerous, especially during bootstrap. I've seen very strange errors
+;; occurring when trying to do so. Hence the TYPE-NAME slot below.
 (defclass method-combination-type (standard-class)
-  ((lambda-list :initform nil)
+  ((type-name :initarg :type-name :reader method-combination-type-name)
+   (lambda-list :initform nil)
    ;; A reader without "type" in the name seems more readable to me.
    (%constructor :initarg :constructor :reader method-combination-%constructor)
    (%cache :initform (make-hash-table :test #'equal)
@@ -81,12 +86,16 @@ combination class."))
 
 (defmethod method-combination-type-name
     ((combination standard-method-combination))
-  (class-name (class-of combination)))
+  ;; #### NOTE: every concrete method combination class is supposed to be
+  ;; implemented as a method combination type.
+  (method-combination-type-name (class-of combination)))
 
 (defmethod print-object ((combination standard-method-combination) stream)
   (print-unreadable-object (combination stream :type t :identity t)
     (format stream "~S ~:S"
-      (slot-value-for-printing (class-of combination) 'name)
+      ;; #### NOTE: every concrete method combination class is supposed to be
+      ;; implemented as a method combination type.
+      (slot-value-for-printing (class-of combination) 'type-name)
       (slot-value-for-printing combination 'options))))
 
 
@@ -110,7 +119,7 @@ order."))
 (defmethod initialize-instance :before
     ((instance short-method-combination)
      &key options &allow-other-keys
-     &aux (name (class-name (class-of (class-of instance)))))
+     &aux (name (method-combination-type-name instance)))
   (when (cdr options)
     (method-combination-error
      "Illegal options to the ~S short method combination.~%~
@@ -130,7 +139,7 @@ order."))
 	   (setq class
 		 (make-instance 'short-method-combination-type
 		   'source source-location
-		   :name name
+		   :type-name name
 		   :direct-superclasses
 		   (list (find-class 'short-method-combination))
 		   :documentation documentation
@@ -179,7 +188,7 @@ method combination."))
 
 (let* ((class (find-class 'standard-standard-method-combination))
        (instance (make-instance class)))
-  (setf (slot-value class 'name) 'standard)
+  (setf (slot-value class 'type-name) 'standard)
   (setf (slot-value class '%constructor)
 	(lambda (options)
 	  (when options
