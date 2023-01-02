@@ -353,7 +353,7 @@ method combination."))
 ;; Late redefinitions
 ;; ------------------
 
-;; At that point, the new infraostructure is in place. We still have a number
+;; At that point, the new infrastructure is in place. We still have a number
 ;; of redefinitions to perform.
 
 (defun method-combination-p (object)
