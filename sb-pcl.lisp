@@ -31,7 +31,7 @@ This hash table maps names to method combination types.")
 ;; occurring when trying to do so. Hence the TYPE-NAME slot below.
 (defclass method-combination-type (standard-class)
   ((type-name :initarg :type-name :reader method-combination-type-name)
-   (lambda-list :initform nil)
+   (lambda-list :initform nil :initarg :lambda-list)
    ;; A reader without "type" in the name seems more readable to me.
    (%constructor :initarg :constructor :reader method-combination-%constructor)
    (%cache :initform (make-hash-table :test #'equal)
@@ -62,6 +62,17 @@ combination class."))
     :initarg :identity-with-one-argument
     :reader short-method-combination-type-identity-with-one-argument))
   (:documentation "Meta-class for short method combination types."))
+
+
+(defclass long-method-combination-type (method-combination-type)
+  ((args-lambda-list :initform nil :initarg :args-lambda-list
+		     :reader long-method-combination-type-args-lambda-list)
+   ;; #### NOTE: in original SBCL, the FUNCTION slot in long method
+   ;; combination objects is unused. This one is, and serves as a replacement
+   ;; for the global variable *long-method-combination-functions*.
+   (%function :initarg :function
+	      :reader long-method-combination-type-%function))
+  (:documentation "Meta-class for long method combination types."))
 
 
 ;; -------------------
@@ -108,9 +119,15 @@ combination class."))
 Short method combinations can only have two instances: one for each method
 order."))
 
+;; #### NOTE: in SBCL, accessor names are inconsistent. Short ones are called
+;; SHORT-COMBINATION-... whereas long ones are called
+;; LONG-METHOD-COMBINATION-...
 (defmethod short-combination-operator ((combination short-method-combination))
   (short-method-combination-type-operator (class-of combination)))
 
+;; #### NOTE: in SBCL, accessor names are inconsistent. Short ones are called
+;; SHORT-COMBINATION-... whereas long ones are called
+;; LONG-METHOD-COMBINATION-...
 (defmethod short-combination-identity-with-one-argument
     ((combination short-method-combination))
   (short-method-combination-type-identity-with-one-argument
@@ -146,16 +163,60 @@ order."))
 	   (setq class
 		 (make-instance 'short-method-combination-type
 		   'source source-location
-		   :type-name name
 		   :direct-superclasses
 		   (list (find-class 'short-method-combination))
 		   :documentation documentation
+		   :type-name name
 		   :constructor
 		   (lambda (options)
 		     (funcall #'make-instance
 		       class :options (or options '(:most-specific-first))))
 		   :operator operator
 		   :identity-with-one-argument identity-with-one-argument))
+	   (setf (gethash name **method-combination-types**) class))))
+  (setf (random-documentation name 'method-combination) documentation)
+  name)
+
+
+;; Long method combinations
+;; ------------------------
+
+(defclass long-method-combination (standard-method-combination)
+  ()
+  (:documentation "Base class for long method combinations."))
+
+;; #### NOTE: in SBCL, accessor names are inconsistent. Short ones are called
+;; SHORT-COMBINATION-... whereas long ones are called
+;; LONG-METHOD-COMBINATION-...
+(defmethod long-method-combination-args-lambda-list
+    ((combination long-method-combination))
+  (long-method-combination-type-args-lambda-list (class-of combination)))
+
+(defmethod compute-effective-method
+    ((function generic-function)
+     (combination long-method-combination)
+     applicable-methods)
+  (funcall (long-method-combination-type-%function (class-of combination))
+    function combination applicable-methods))
+
+(defun load-long-defcombin
+    (name documentation function lambda-list args-lambda-list source-location)
+  (let ((class (gethash name **method-combination-types**)))
+    (cond (class ) ;; #### FIXME: implement redefinition.
+	  (t
+	   (setq class
+		 (make-instance 'long-method-combination-type
+		   'source source-location
+		   :direct-superclasses
+		   (list (find-class 'long-method-combination))
+		   :documentation documentation
+		   :type-name name
+		   :lambda-list lambda-list
+		   :constructor
+		   (lambda (options)
+		     (funcall #'make-instance class :options options))
+		   :args-lambda-list args-lambda-list
+		   :function function))
 	   (setf (gethash name **method-combination-types**) class))))
   (setf (random-documentation name 'method-combination) documentation)
   name)
@@ -300,6 +361,9 @@ method combination."))
 
 (defun short-method-combination-p (object)
   (typep object 'short-method-combination))
+
+(defun long-method-combination-p (object)
+  (typep object 'long-method-combination))
 
 (defmethod find-method-combination
     ((generic-function generic-function) name options)
