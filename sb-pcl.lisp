@@ -81,7 +81,7 @@ combination class."))
 
 (defmethod method-combination-type-name
     ((combination standard-method-combination))
-  (class-name (class-of combination)))  
+  (class-name (class-of combination)))
 
 (defmethod print-object ((combination standard-method-combination) stream)
   (print-unreadable-object (combination stream :type t :identity t)
