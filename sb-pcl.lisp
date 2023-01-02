@@ -292,10 +292,14 @@ method combination."))
 ;; Late redefinitions
 ;; ------------------
 
-;; At that point, the new infrastructure is in place. We still have a number
+;; At that point, the new infraostructure is in place. We still have a number
 ;; of redefinitions to perform.
 
-(defun method-combination-p (object) (typep object 'method-combination))
+(defun method-combination-p (object)
+  (typep object 'method-combination))
+
+(defun short-method-combination-p (object)
+  (typep object 'short-method-combination))
 
 (defmethod find-method-combination
     ((generic-function generic-function) name options)
