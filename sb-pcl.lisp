@@ -9,6 +9,17 @@
 (in-package :sb-pcl)
 
 
+(defgeneric update-generic-function-for-redefined-method-combination
+    (function combination)
+  (:documentation
+   "Inform generic FUNCTION that its method COMBINATION was redefined.")
+  (:method ((function generic-function) combination)
+    "Flush the effective method cache and reinitialize FUNCTION."
+    ;; This is just what SBCL does.
+    (sb-pcl::flush-effective-method-cache function)
+    (reinitialize-instance function)))
+
+
 ;; =========================
 ;; Infrastructure Definition
 ;; =========================
@@ -33,7 +44,7 @@ This hash table maps names to method combination types.")
   ((type-name :initarg :type-name :reader method-combination-type-name)
    (lambda-list :initform nil :initarg :lambda-list)
    ;; A reader without "type" in the name seems more readable to me.
-   (%constructor :initarg :constructor :reader method-combination-%constructor)
+   (%constructor :reader method-combination-%constructor)
    (%cache :initform (make-hash-table :test #'equal)
 	   :reader method-combination-type-%cache))
   (:documentation "Meta-class for method combination types.
@@ -114,6 +125,16 @@ combination class."))
       (slot-value-for-printing (class-of combination) 'type-name)
       (slot-value-for-printing combination 'options))))
 
+(defmethod update-instance-for-different-class :after
+    ((previous standard-method-combination)
+     (current standard-method-combination)
+     &key &allow-other-keys)
+  (maphash (lambda (gf ignore)
+             (declare (ignore ignore))
+	     (update-generic-function-for-redefined-method-combination
+	      gf current))
+	   (method-combination-%generic-functions current)))
+
 
 ;; Short method combinations
 ;; -------------------------
@@ -168,23 +189,28 @@ combination class."))
 ;; Replacement for both load-short-defcombin and short-combine-methods.
 (defun load-short-defcombin
     (name operator identity-with-one-argument documentation source-location)
-  (let ((class (gethash name **method-combination-types**)))
-    (cond (class ) ;; #### FIXME: implement redefinition.
-	  (t
-	   (setq class
-		 (make-instance 'short-method-combination-type
-		   'source source-location
-		   :direct-superclasses
-		   (list (find-class 'short-method-combination))
-		   :documentation documentation
-		   :type-name name
-		   :constructor
-		   (lambda (options)
-		     (funcall #'make-instance
-		       class :options (or options '(:most-specific-first))))
-		   :operator operator
-		   :identity-with-one-argument identity-with-one-argument))
-	   (setf (gethash name **method-combination-types**) class))))
+  ;; #### NOTE: we can't change-class class metaobjects, so we need to
+  ;; recreate a brand new one.
+  (let ((old (gethash name **method-combination-types**))
+	(new (make-instance 'short-method-combination-type
+	       'source source-location
+	       :direct-superclasses
+	       (list (find-class 'short-method-combination))
+	       :documentation documentation
+	       :type-name name
+	       :operator operator
+	       :identity-with-one-argument identity-with-one-argument)))
+    (setf (slot-value new '%constructor)
+	  (lambda (options)
+	    (funcall #'make-instance
+	      new :options (or options '(:most-specific-first)))))
+    (when old
+      (setf (slot-value new '%cache) (method-combination-type-%cache old))
+      (maphash (lambda (options combination)
+		 (declare (ignore options))
+		 (change-class combination new))
+	       (method-combination-type-%cache new)))
+    (setf (gethash name **method-combination-types**) new))
   (setf (random-documentation name 'method-combination) documentation)
   name)
 
@@ -212,23 +238,27 @@ combination class."))
 
 (defun load-long-defcombin
     (name documentation function lambda-list args-lambda-list source-location)
-  (let ((class (gethash name **method-combination-types**)))
-    (cond (class ) ;; #### FIXME: implement redefinition.
-	  (t
-	   (setq class
-		 (make-instance 'long-method-combination-type
-		   'source source-location
-		   :direct-superclasses
-		   (list (find-class 'long-method-combination))
-		   :documentation documentation
-		   :type-name name
-		   :lambda-list lambda-list
-		   :constructor
-		   (lambda (options)
-		     (funcall #'make-instance class :options options))
-		   :args-lambda-list args-lambda-list
-		   :function function))
-	   (setf (gethash name **method-combination-types**) class))))
+  ;; #### NOTE: we can't change-class class metaobjects, so we need to
+  ;; recreate a brand new one.
+  (let ((old (gethash name **method-combination-types**))
+	(new (make-instance 'long-method-combination-type
+	       'source source-location
+	       :direct-superclasses
+	       (list (find-class 'long-method-combination))
+	       :documentation documentation
+	       :type-name name
+	       :lambda-list lambda-list
+	       :args-lambda-list args-lambda-list
+	       :function function)))
+    (setf (slot-value new '%constructor)
+	  (lambda (options) (funcall #'make-instance new :options options)))
+    (when old
+      (setf (slot-value new '%cache) (method-combination-type-%cache old))
+      (maphash (lambda (options combination)
+		 (declare (ignore options))
+		 (change-class combination new))
+	       (method-combination-type-%cache new)))
+    (setf (gethash name **method-combination-types**) new))
   (setf (random-documentation name 'method-combination) documentation)
   name)
 
