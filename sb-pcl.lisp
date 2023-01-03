@@ -52,6 +52,19 @@ It is the base class for short and long method combination types meta-classes.
 This only class directly implemented as this class is the standard method
 combination class."))
 
+(defun load-defcombin
+    (name new documentation
+     &aux (old (gethash name **method-combination-types**)))
+  (when old
+    (setf (slot-value new '%cache) (method-combination-type-%cache old))
+    (maphash (lambda (options combination)
+	       (declare (ignore options))
+	       (change-class combination new))
+	     (method-combination-type-%cache new)))
+  (setf (gethash name **method-combination-types**) new)
+  (setf (random-documentation name 'method-combination) documentation)
+  name)
+
 (defmethod print-object ((type method-combination-type) stream)
   (print-unreadable-object (type stream :type t :identity t)
     (format stream "~S ~:S"
@@ -191,8 +204,7 @@ combination class."))
     (name operator identity-with-one-argument documentation source-location)
   ;; #### NOTE: we can't change-class class metaobjects, so we need to
   ;; recreate a brand new one.
-  (let ((old (gethash name **method-combination-types**))
-	(new (make-instance 'short-method-combination-type
+  (let ((new (make-instance 'short-method-combination-type
 	       'source source-location
 	       :direct-superclasses
 	       (list (find-class 'short-method-combination))
@@ -204,15 +216,7 @@ combination class."))
 	  (lambda (options)
 	    (funcall #'make-instance
 	      new :options (or options '(:most-specific-first)))))
-    (when old
-      (setf (slot-value new '%cache) (method-combination-type-%cache old))
-      (maphash (lambda (options combination)
-		 (declare (ignore options))
-		 (change-class combination new))
-	       (method-combination-type-%cache new)))
-    (setf (gethash name **method-combination-types**) new))
-  (setf (random-documentation name 'method-combination) documentation)
-  name)
+    (load-defcombin name new documentation)))
 
 
 ;; Long method combinations
@@ -240,8 +244,7 @@ combination class."))
     (name documentation function lambda-list args-lambda-list source-location)
   ;; #### NOTE: we can't change-class class metaobjects, so we need to
   ;; recreate a brand new one.
-  (let ((old (gethash name **method-combination-types**))
-	(new (make-instance 'long-method-combination-type
+  (let ((new (make-instance 'long-method-combination-type
 	       'source source-location
 	       :direct-superclasses
 	       (list (find-class 'long-method-combination))
@@ -252,15 +255,7 @@ combination class."))
 	       :function function)))
     (setf (slot-value new '%constructor)
 	  (lambda (options) (funcall #'make-instance new :options options)))
-    (when old
-      (setf (slot-value new '%cache) (method-combination-type-%cache old))
-      (maphash (lambda (options combination)
-		 (declare (ignore options))
-		 (change-class combination new))
-	       (method-combination-type-%cache new)))
-    (setf (gethash name **method-combination-types**) new))
-  (setf (random-documentation name 'method-combination) documentation)
-  name)
+    (load-defcombin name new documentation)))
 
 
 
