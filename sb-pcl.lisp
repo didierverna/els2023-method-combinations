@@ -130,7 +130,7 @@ combination class."))
      (current standard-method-combination)
      &key &allow-other-keys)
   (maphash (lambda (gf ignore)
-             (declare (ignore ignore))
+	     (declare (ignore ignore))
 	     (update-generic-function-for-redefined-method-combination
 	      gf current))
 	   (method-combination-%generic-functions current)))
