@@ -42,7 +42,8 @@ This hash table maps names to method combination types.")
 ;; occurring when trying to do so. Hence the TYPE-NAME slot below.
 (defclass method-combination-type (standard-class)
   ((type-name :initarg :type-name :reader method-combination-type-name)
-   (lambda-list :initform nil :initarg :lambda-list)
+   (lambda-list :initform nil :initarg :lambda-list
+		:reader method-combination-type-lambda-list)
    ;; A reader without "type" in the name seems more readable to me.
    (%constructor :reader method-combination-%constructor)
    (%cache :initform (make-hash-table :test #'equal)
