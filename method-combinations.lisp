@@ -70,7 +70,7 @@ the combination again, regardless of the value of ERRORP."
    (current sb-pcl::standard-method-combination)
    &key &allow-other-keys)
   (maphash (lambda (gf ignore)
-             (declare (ignore ignore))
+	     (declare (ignore ignore))
 	     (update-generic-function-for-redefined-method-combination
 	      gf current))
 	   (sb-pcl::method-combination-%generic-functions current)))
@@ -241,7 +241,7 @@ arguments."
   (:method ((function generic-function!) combination)
     "Either fall back to the default behavior when COMBINATION is FUNCTION's
 regular method combination, or invalidate the corresponding cached
-discriminating function." 
+discriminating function."
     (if (eq combination (generic-function-method-combination function))
       (call-next-method)
       ;; #### FIXME: do we need this or not ? It doesn't seem to affect the
