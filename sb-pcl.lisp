@@ -32,7 +32,7 @@
   (:method ((function generic-function) combination)
     "Flush the effective method cache and reinitialize FUNCTION."
     ;; This is just what SBCL does.
-    (sb-pcl::flush-effective-method-cache function)
+    (flush-effective-method-cache function)
     (reinitialize-instance function)))
 
 
@@ -182,7 +182,7 @@ combination class."))
   ((options :initform nil
 	    :initarg :options
 	    :reader method-combination-options)
-   (%generic-functions :initform (sb-pcl::make-gf-hashset)
+   (%generic-functions :initform (make-gf-hashset)
 		       :reader method-combination-%generic-functions))
   (:documentation "Base class for standard method combinations.
 It is the base class for short and long method combinations.
