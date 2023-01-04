@@ -116,6 +116,14 @@ combination class."))
     ()
     (:documentation "Base class for method combinations.")))
 
+(defmethod documentation ((combination method-combination) (doctype (eql t)))
+  (documentation (class-of combination) t))
+
+(defmethod documentation
+    ((combination method-combination) (doctype (eql 'method-combination)))
+  (documentation (class-of combination) t))
+
+
 ;; #### NOTE: SBCL normally has the equivalent of this class instantiated
 ;; once, and also serving as a base class for other method combinations, but I
 ;; don't like that. I prefer to make the standard method combination behave as
