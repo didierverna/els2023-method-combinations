@@ -86,8 +86,7 @@ combination class."))
   t)
 
 (defun load-defcombin
-    (name new documentation
-     &aux (old (gethash name **method-combination-types**)))
+    (name new documentation &aux (old (find-method-combination-type name nil)))
   (when old
     (setf (slot-value new '%cache) (method-combination-type-%cache old))
     (maphash (lambda (options combination)
@@ -446,7 +445,7 @@ method combination."))
 
 ;; Built-in method combinations
 (dolist (name '(+ and append list max min nconc or progn))
-  (let ((type (gethash name **method-combination-types**)))
+  (let ((type (find-method-combination-type name)))
     (dolist (entry (method-combination-info-cache
 		    (gethash name **method-combinations**)))
       (let ((combination
