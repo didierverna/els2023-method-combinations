@@ -6,6 +6,22 @@
 ;; because the MOP forbids the redefinition of some classes of class
 ;; meta-objects, which is exactly what we want to do here.
 
+;; Post ELS 2018, we don't need method combinators anymore, as SBCL correctly
+;; handles generic functions and method combinations updates. The current
+;; implementation still leaves room for improvement, however, which is the
+;; purpose of this code.
+
+;; The wording of the standard suggests that method combinations thingies
+;; (that is, what's defined by DEFINE-METHOD-COMBINATION) behave like
+;; parametric types. SBCL doesn't have an object-oriented representation for
+;; those (merely a METHOD-COMBINATION-INFO structure). The code below makes
+;; this happen. It implements a METHOD-COMBINATION-TYPE hierarchy replacing
+;; SBCL's INFO structure. Each new method combination type creates a subclass
+;; in the method combinations hierarchy, with a method combination type as its
+;; meta-class. This allows a clean separation between information belonging to
+;; the method combination type, and information belonging to one specific use
+;; (instance) by a generic function.
+
 (in-package :sb-pcl)
 
 

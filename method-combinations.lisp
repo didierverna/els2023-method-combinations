@@ -17,11 +17,6 @@
 ;; Method Combinations
 ;; ===================
 
-;; Post ELS 2018, we don't need method combinators anymore, as SBCL correctly
-;; handles generic functions and method combinations updates. The current
-;; implementation still leaves room for improvement however. See comment
-;; below.
-
 ;; -------------------------
 ;; Method combination access
 ;; -------------------------
@@ -46,16 +41,6 @@ the combination again, regardless of the value of ERRORP."
 			   options))
 		   (sb-pcl::method-combination-info-cache info)))))
       (and errorp (error "No method combination named ~A." name))))
-
-;; The wording of the standard suggests that method combinations thingies
-;; (that is, what's defined by DEFINE-METHOD-COMBINATION) behave like
-;; parametric types. SBCL doesn't have an object-oriented representation for
-;; those (merely a METHOD-COMBINATION-INFO structure), but it would make sense
-;; to turn that into an OO hierarchy, in which case SBCL's method combination
-;; classes would need to be refined (for example, the OPTIONS slot in
-;; STANDARD-METHOD-COMBINATION is not nice). A new method combination type
-;; would become a subclass of SHORT/LONG-METHOD-COMBINATION, and specific uses
-;; with specific sets of arguments would become instances of those.
 
 ;; In any case, in the current state of things, FIND-METHOD-COMBINATION[!] is
 ;; closer to FIND-METHOD than to FIND-CLASS for instance, in that a name is
