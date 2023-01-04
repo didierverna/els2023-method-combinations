@@ -454,7 +454,7 @@ method combination."))
 ;; concerned generic functions.
 (let ((combination
 	(gethash nil (method-combination-type-%cache
-		      (gethash 'standard **method-combination-types**)))))
+		      (find-method-combination-type 'standard)))))
   (transfer-cache-and-update-generic-functions
    combination *standard-method-combination*)
   (setq *standard-method-combination* combination))
@@ -492,7 +492,7 @@ method combination."))
 
 (defmethod find-method-combination
     ((generic-function generic-function) name options)
-  (let ((type (gethash name **method-combination-types**)))
+  (let ((type (find-method-combination-type name nil)))
     (when type
       (or (gethash options (method-combination-type-%cache type))
 	  (setf (gethash options (method-combination-type-%cache type))
