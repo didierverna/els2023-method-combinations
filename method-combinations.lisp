@@ -185,7 +185,7 @@ discriminating function."
       ;; tests and I don't currently understand SBCL's effective method
       ;; caches.
       ;; (sb-pcl::flush-effective-method-cache function)
-      (remhash combination (functions function)))))
+      (remhash combination (functions function))))
 
 
 ;; ------------------------

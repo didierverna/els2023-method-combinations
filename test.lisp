@@ -90,7 +90,7 @@
   (assert-equal  5.0 (gf1 5.0))
   (assert-equal -1   (gf2 5))
   (assert-equal  5.0 (gf2 5.0))
-  
+
   ;; Make sure previous calls are undisturbed.
   (assert-equal 11   (call/cb +! gf1 5))
   (assert-equal  5.0 (call/cb +! gf1 5.0))
@@ -109,7 +109,7 @@
   ;; Make sure the generic function is called a couple of times.
   (assert-equal 6 (gf 5))
   (assert-equal 5.0 (gf 5.0))
-  
+
   (assert-equal  1   (call/cb -! gf 5))
   (assert-equal -5.0 (call/cb -! gf 5.0))
   (assert-equal -1   (call/cb (-! :most-specific-last) gf 5))
