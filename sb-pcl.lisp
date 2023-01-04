@@ -200,6 +200,30 @@ combination class."))
       ORDER must be either :MOST-SPECIFIC-FIRST or :MOST-SPECIFIC-LAST."
      name)))
 
+(defmethod invalid-qualifiers ((gf generic-function)
+			       (combin short-method-combination)
+			       method)
+  (let* ((qualifiers (method-qualifiers method))
+	 (qualifier (first qualifiers))
+	 (type-name (method-combination-type-name combin))
+	 (why (cond
+		((null qualifiers)
+		 "has no qualifiers")
+		((cdr qualifiers)
+		 "has too many qualifiers")
+		(t
+		 (aver (not (short-method-combination-qualifier-p
+			     type-name qualifier)))
+		 "has an invalid qualifier"))))
+    (invalid-method-error
+     method
+     "~@<The method ~S on ~S ~A.~
+      ~@:_~@:_~
+      The method combination type ~S was defined with the short form ~
+      of DEFINE-METHOD-COMBINATION and so requires all methods have ~
+      either ~{the single qualifier ~S~^ or ~}.~@:>"
+     method gf why type-name (short-method-combination-qualifiers type-name))))
+
 ;; Replacement for both load-short-defcombin and short-combine-methods.
 (defun load-short-defcombin
     (name operator identity-with-one-argument documentation source-location)
