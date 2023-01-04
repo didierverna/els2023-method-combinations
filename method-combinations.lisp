@@ -3,7 +3,8 @@
   (:import-from :sb-mop
     :funcallable-standard-class
     :generic-function-method-combination
-    :find-method-combination-type)
+    :find-method-combination-type
+    :update-generic-function-for-redefined-method-combination)
   (:export :find-method-combination!
 	   :define-long-short-method-combination
 	   :+! :*! :max! :min! :nconc! :progn! :and! :or! :list! :append!
@@ -17,10 +18,6 @@
 ;; ===================
 ;; Method Combinations
 ;; ===================
-
-;; -------------------------
-;; Method combination access
-;; -------------------------
 
 ;; A better protocol to access method combination objects. This is merely a
 ;; duplication of my patched SBCL's code for FIND-METHOD-COMBINATION. There's
@@ -39,50 +36,6 @@ the combination again, regardless of the value of ERRORP."
 	(setf (gethash options (sb-pcl::method-combination-type-%cache type))
 	      (funcall (sb-pcl::method-combination-%constructor type)
 		options)))))
-
-
-;; ----------------------------
-;; Method combinations updating
-;; ----------------------------
-
-;; SBCL has an UPDATE-MCS function which it calls whenever a method
-;; combination type is created or redefined. In case of a redefinition, this
-;; function transfers the old cache to the new info structure, and then
-;; updates the existing method combination instances by calling CHANGE-CLASS
-;; on them (as I did in the ELS 2018 version), and invalidates all associated
-;; generic functions. This is essentially what the "Clients management"
-;; section of my previous work did.
-
-;; One improvement we can make here is move the generic functions invalidation
-;; code to an UPDATE-INSTANCE-FOR-DIFFERENT-CLASS method on method
-;; combinations.
-
-(defmethod update-instance-for-different-class :after
-  ((previous sb-pcl::standard-method-combination)
-   (current sb-pcl::standard-method-combination)
-   &key &allow-other-keys)
-  (maphash (lambda (gf ignore)
-	     (declare (ignore ignore))
-	     (update-generic-function-for-redefined-method-combination
-	      gf current))
-	   (sb-pcl::method-combination-%generic-functions current)))
-
-(sb-ext:with-unlocked-packages (sb-pcl)
-  (defun sb-pcl::update-mcs (name new old frobmc)
-    (setf (gethash name sb-pcl::**method-combinations**) new)
-    ;; for correctness' sake we should probably lock **METHOD-COMBINATIONS**
-    ;; while we're updating things, to defend against defining gfs in one
-    ;; thread while redefining the method combination in another thread.
-    (when old
-      (setf (sb-pcl::method-combination-info-cache new)
-	    (sb-pcl::method-combination-info-cache old))
-      (setf (sb-pcl::method-combination-info-cache old) nil)
-      (dolist (entry (sb-pcl::method-combination-info-cache new))
-	(funcall frobmc (cdr entry))))))
-
-;; Also, method combination objects are low-level and should only be
-;; manipulated by SBCL's internals, so it's not worth implementing anything
-;; special for REINITIALIZE-INSTANCE.
 
 
 
@@ -221,17 +174,9 @@ arguments."
 ;; Method combination redefinition handling
 ;; ----------------------------------------
 
-(defgeneric update-generic-function-for-redefined-method-combination
-    (function combination)
-  (:documentation
-   "Inform generic FUNCTION that method COMBINATION was redefined.")
-  (:method ((function generic-function) combination)
-    "Flush the effective method cache and reinitialize FUNCTION."
-    ;; This is just what SBCL does.
-    (sb-pcl::flush-effective-method-cache function)
-    (reinitialize-instance function))
-  (:method ((function generic-function!) combination)
-    "Either fall back to the default behavior when COMBINATION is FUNCTION's
+(defmethod update-generic-function-for-redefined-method-combination
+    ((function generic-function!) combination)
+  "Either fall back to the default behavior when COMBINATION is FUNCTION's
 regular method combination, or invalidate the corresponding cached
 discriminating function."
     (if (eq combination (generic-function-method-combination function))

@@ -575,10 +575,11 @@ method combination."))
 		       :name fun-name initargs))
 	(note-gf-signature fun-name lambda-list-p lambda-list)))))
 
-
 (sb-ext:with-unlocked-packages (sb-mop)
-  (let ((sb-mop (find-package :sb-mop)))
-    (import 'find-method-combination-type sb-mop)
-    (export 'find-method-combination-type sb-mop)))
+  (let ((sb-mop (find-package :sb-mop))
+	(symbols '(update-generic-function-for-redefined-method-combination
+		   find-method-combination-type)))
+    (import symbols sb-mop)
+    (export symbols sb-mop)))
 
 ;;; sb-pcl.lisp ends here
