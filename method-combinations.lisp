@@ -2,7 +2,8 @@
   (:use :cl)
   (:import-from :sb-mop
     :funcallable-standard-class
-    :generic-function-method-combination)
+    :generic-function-method-combination
+    :find-method-combination-type)
   (:export :find-method-combination!
 	   :define-long-short-method-combination
 	   :+! :*! :max! :min! :nconc! :progn! :and! :or! :list! :append!
@@ -22,31 +23,22 @@
 ;; -------------------------
 
 ;; A better protocol to access method combination objects. This is merely a
-;; duplication of SBCL's code for the original FIND-METHOD-COMBINATION.
+;; duplication of my patched SBCL's code for FIND-METHOD-COMBINATION. There's
+;; no point in implementing a SETF method here since those objects are handled
+;; internally and automatically.
 (defun find-method-combination!
     (name &optional options (errorp t)
-	  &aux (info (gethash name sb-pcl::**method-combinations**)))
+	  &aux (type (find-method-combination-type name errorp)))
   "Find a method combination object for NAME and OPTIONS.
 If ERRORP (the default), throw an error if no NAMEd method combination type is
 found. Otherwise, return NIL. Note that when a NAMEd method combination type
 exists, asking for a new set of (conformant) OPTIONS will always instantiate
 the combination again, regardless of the value of ERRORP."
-  (or (when info
-	(or (cdr (assoc options (sb-pcl::method-combination-info-cache info)
-			:test #'equal))
-	    (cdar (push
-		   (cons options
-			 (funcall
-			     (sb-pcl::method-combination-info-constructor info)
-			   options))
-		   (sb-pcl::method-combination-info-cache info)))))
-      (and errorp (error "No method combination named ~A." name))))
-
-;; In any case, in the current state of things, FIND-METHOD-COMBINATION[!] is
-;; closer to FIND-METHOD than to FIND-CLASS for instance, in that a name is
-;; not associated with a single method combination, but with a set of those
-;; (a METHOD-COMBINATION-INFO structure). So it doesn't make sense to
-;; implement a SETF method for it.
+  (when type
+    (or (gethash options (sb-pcl::method-combination-type-%cache type))
+	(setf (gethash options (sb-pcl::method-combination-type-%cache type))
+	      (funcall (sb-pcl::method-combination-%constructor type)
+		options)))))
 
 
 ;; ----------------------------
