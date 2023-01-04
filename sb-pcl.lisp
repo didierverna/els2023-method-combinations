@@ -120,6 +120,16 @@ combination class."))
     ()
     (:documentation "Base class for method combinations.")))
 
+(let ((classes (mapcar #'find-class
+		 '(class eql-specializer class-eq-specializer
+		   ;; #### FIXME: what about METHOD-COMBINATION-TYPE here ?
+		   method method-combination))))
+  (dolist (class classes)
+    (dolist (other-class classes)
+      (unless (eq class other-class)
+	(pushnew other-class (class-incompatible-superclass-list class)
+		 :test #'eq)))))
+
 (defmethod documentation ((combination method-combination) (doctype (eql t)))
   (documentation (class-of combination) t))
 
