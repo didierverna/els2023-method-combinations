@@ -53,6 +53,25 @@ It is the base class for short and long method combination types meta-classes.
 This only class directly implemented as this class is the standard method
 combination class."))
 
+(defmethod print-object ((type method-combination-type) stream)
+  (print-unreadable-object (type stream :type t :identity t)
+    (format stream "~S ~:S"
+      (slot-value-for-printing type 'type-name)
+      (slot-value-for-printing type 'lambda-list))))
+
+;; #### NOTE: (DOCUMENTATION OBJECT T) is automatically supported on method
+;; #### combination types because we set the documentation class slot when we
+;; #### create them in LOAD-*-DEFCOMBIN.
+(defmethod documentation
+    ((type method-combination-type) (doctype (eql 'method-combination)))
+  (documentation type t))
+
+;; Validate the creation of subclasses of METHOD-COMBINATION implemented as
+;; METHOD-COMBINATION-TYPE.
+(defmethod validate-superclass
+    ((class method-combination-type) (superclass standard-class))
+  t)
+
 (defun load-defcombin
     (name new documentation
      &aux (old (gethash name **method-combination-types**)))
@@ -65,18 +84,6 @@ combination class."))
   (setf (gethash name **method-combination-types**) new)
   (setf (random-documentation name 'method-combination) documentation)
   name)
-
-(defmethod print-object ((type method-combination-type) stream)
-  (print-unreadable-object (type stream :type t :identity t)
-    (format stream "~S ~:S"
-      (slot-value-for-printing type 'type-name)
-      (slot-value-for-printing type 'lambda-list))))
-
-;; Validate the creation of subclasses of METHOD-COMBINATION implemented as
-;; METHOD-COMBINATION-TYPE.
-(defmethod validate-superclass
-    ((class method-combination-type) (superclass standard-class))
-  t)
 
 
 (defclass short-method-combination-type (method-combination-type)
