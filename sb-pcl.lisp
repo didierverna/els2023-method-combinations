@@ -29,6 +29,15 @@
   "The global method combination types hash table.
 This hash table maps names to method combination types.")
 
+;; Analog to find class.
+(defun find-method-combination-type (name &optional (errorp t))
+  "Find a NAMEd method combination type.
+If ERRORP (the default), throw an error if no such method combination type is
+found. Otherwise, return NIL."
+  (or (gethash name **method-combination-types**)
+      (when errorp
+	(error "There is no method combination type named ~A." name))))
+
 
 ;; ------------------------
 ;; Method combination types
