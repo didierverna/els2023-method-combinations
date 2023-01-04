@@ -66,6 +66,10 @@ combination class."))
     ((type method-combination-type) (doctype (eql 'method-combination)))
   (documentation type t))
 
+(defmethod (setf documentation)
+    (value (type method-combination-type) (doctype (eql 'method-combination)))
+  (setf (documentation type t) value))
+
 ;; Validate the creation of subclasses of METHOD-COMBINATION implemented as
 ;; METHOD-COMBINATION-TYPE.
 (defmethod validate-superclass
@@ -123,6 +127,15 @@ combination class."))
     ((combination method-combination) (doctype (eql 'method-combination)))
   (documentation (class-of combination) t))
 
+(defmethod (setf documentation)
+    (value (combination method-combination) (doctype (eql t)))
+  (setf (documentation (class-of combination) t) value))
+
+(defmethod (setf documentation)
+    (value
+     (combination method-combination)
+     (doctype (eql 'method-combination)))
+  (setf (documentation (class-of combination) t) value))
 
 ;; #### NOTE: SBCL normally has the equivalent of this class instantiated
 ;; once, and also serving as a base class for other method combinations, but I
