@@ -30,6 +30,8 @@
 This hash table maps names to method combination types.")
 
 ;; Analog to find class.
+;; #### NOTE: I'm not defining a SETF method on it here because we wouldn't
+;; want it to be public.
 (defun find-method-combination-type (name &optional (errorp t))
   "Find a NAMEd method combination type.
 If ERRORP (the default), throw an error if no such method combination type is
