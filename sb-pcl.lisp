@@ -288,15 +288,43 @@ combination class."))
       either ~{the single qualifier ~S~^ or ~}.~@:>"
      method gf why type-name (short-method-combination-qualifiers type-name))))
 
+;; Overridden to allow a :method-combination-class argument.
+(defun expand-short-defcombin (whole)
+  (let* ((canary (cons nil nil))
+         (type-name (cadr whole))
+         (documentation (getf (cddr whole) :documentation canary))
+         (ioa (getf (cddr whole) :identity-with-one-argument nil))
+         (operator
+           (getf (cddr whole) :operator type-name))
+	 (class (getf (cddr whole) :method-combination-class
+		      'short-method-combination)))
+    (unless (or (eq documentation canary)
+                (stringp documentation))
+      (%program-error
+       "~@<~S argument to the short form of ~S must be a string.~:@>"
+       :documentation 'define-method-combination))
+    `(load-short-defcombin
+      ',type-name ',operator ',ioa
+      ',(and (neq documentation canary) documentation)
+      ',class
+      (sb-c:source-location))))
+
 ;; Replacement for both load-short-defcombin and short-combine-methods.
 (defun load-short-defcombin
-    (name operator identity-with-one-argument documentation source-location)
+    (name operator identity-with-one-argument documentation class
+     source-location
+     &aux (class (find-class class)))
+  (unless (subtypep class 'short-method-combination)
+    (method-combination-error
+     "Invalid method combination class: ~A.~%~
+      When defining a method combination type in short form, the provided~%~
+      method combination class must be a subclass of SHORT-METHOD-COMBINATION."
+     class))
   ;; #### NOTE: we can't change-class class metaobjects, so we need to
   ;; recreate a brand new one.
   (let ((new (make-instance 'short-method-combination-type
 	       'source source-location
-	       :direct-superclasses
-	       (list (find-class 'short-method-combination))
+	       :direct-superclasses (list class)
 	       :documentation documentation
 	       :type-name name
 	       :operator operator
@@ -329,14 +357,57 @@ combination class."))
   (funcall (long-method-combination-type-%function (class-of combination))
     function combination applicable-methods))
 
+;; Overridden to allow a :method-combination-class argument.
+(defun expand-long-defcombin (form)
+  (let ((type-name (cadr form))
+        (lambda-list (caddr form))
+        (method-group-specifiers-presentp (cdddr form))
+        (method-group-specifiers (cadddr form))
+        (body (cddddr form))
+        (args-option ())
+        (gf-var nil)
+	(mc-class 'long-method-combination))
+    (unless method-group-specifiers-presentp
+      (%program-error
+       "~@<The long form of ~S requires a list of method group specifiers.~:@>"
+       'define-method-combination))
+    (when (and (consp (car body)) (eq (caar body) :arguments))
+      (setq args-option (cdr (pop body))))
+    (when (and (consp (car body)) (eq (caar body) :generic-function))
+      (unless (and (cdar body) (symbolp (cadar body)) (null (cddar body)))
+        (%program-error
+	 "~@<The argument to the ~S option of ~S must be a single symbol.~:@>"
+         :generic-function 'define-method-combination))
+      (setq gf-var (cadr (pop body))))
+    (when (and (consp (car body)) (eq (caar body) :method-combination-class))
+      (unless (and (cdar body) (symbolp (cadar body)) (null (cddar body)))
+        (%program-error
+	 "~@<The argument to the ~S option of ~S must be a single symbol.~:@>"
+         :method-combination-class 'define-method-combination))
+      (setq mc-class (cadr (pop body))))
+    (multiple-value-bind (documentation function)
+        (make-long-method-combination-function
+         type-name lambda-list method-group-specifiers args-option gf-var
+         body)
+      `(load-long-defcombin
+	',type-name ',documentation #',function ',lambda-list
+	',args-option ',mc-class (sb-c:source-location)))))
+
 (defun load-long-defcombin
-    (name documentation function lambda-list args-lambda-list source-location)
+    (name documentation function lambda-list args-lambda-list class
+     source-location
+     &aux (class (find-class class)))
+  (unless (subtypep class 'long-method-combination)
+    (method-combination-error
+     "Invalid method combination class: ~A.~%~
+      When defining a method combination type in long form, the provided~%~
+      method combination class must be a subclass of LONG-METHOD-COMBINATION."
+     class))
   ;; #### NOTE: we can't change-class class metaobjects, so we need to
   ;; recreate a brand new one.
   (let ((new (make-instance 'long-method-combination-type
 	       'source source-location
-	       :direct-superclasses
-	       (list (find-class 'long-method-combination))
+	       :direct-superclasses (list class)
 	       :documentation documentation
 	       :type-name name
 	       :lambda-list lambda-list
@@ -578,7 +649,8 @@ method combination."))
 (sb-ext:with-unlocked-packages (sb-mop)
   (let ((sb-mop (find-package :sb-mop))
 	(symbols '(update-generic-function-for-redefined-method-combination
-		   find-method-combination-type)))
+		   find-method-combination-type
+		   short-method-combination long-method-combination)))
     (import symbols sb-mop)
     (export symbols sb-mop)))
 
