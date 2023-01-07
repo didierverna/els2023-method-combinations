@@ -288,7 +288,13 @@ combination class."))
       either ~{the single qualifier ~S~^ or ~}.~@:>"
      method gf why type-name (short-method-combination-qualifiers type-name))))
 
-;; Overridden to allow a :method-combination-class argument.
+;; Overridden to allow a :method-combination-class argument. Note that
+;; contrary to DEFGENERIC for example, the standard doesn't allow
+;; implementations to extend DEFINE-METHOD-COMBINATION with additional keyword
+;; arguments. But then again, it doesn't explicitly forbids it either, and
+;; SBCL doesn't care, so it "just works" to leave it be. If this really is
+;; unacceptable, we can always provide a DEFINE-METHOD-COMBINATION-TYPE macro,
+;; which would be a better name anyway.
 (defun expand-short-defcombin (whole)
   (let* ((canary (cons nil nil))
          (type-name (cadr whole))
@@ -357,7 +363,13 @@ combination class."))
   (funcall (long-method-combination-type-%function (class-of combination))
     function combination applicable-methods))
 
-;; Overridden to allow a :method-combination-class argument.
+;; Overridden to allow a :method-combination-class argument. Note that
+;; contrary to DEFGENERIC for example, the standard doesn't allow
+;; implementations to extend DEFINE-METHOD-COMBINATION with additional keyword
+;; arguments. But then again, it doesn't explicitly forbids it either, and
+;; SBCL doesn't care, so it "just works" to leave it be. If this really is
+;; unacceptable, we can always provide a DEFINE-METHOD-COMBINATION-TYPE macro,
+;; which would be a better name anyway.
 (defun expand-long-defcombin (form)
   (let ((type-name (cadr form))
         (lambda-list (caddr form))

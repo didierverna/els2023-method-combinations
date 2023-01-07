@@ -19,17 +19,17 @@
     (:method ((i integer)) (1+ i)))
 
   (assert-equal  6 (gf 5))
-  (assert-equal 11 (call/cb +! gf 5))
-  (assert-equal 30 (call/cb *! gf 5))
+  (assert-equal 11 (call/cb :+ gf 5))
+  (assert-equal 30 (call/cb :* gf 5))
   ;; Make sure previous calls are undisturbed.
-  (assert-equal 11 (call/cb +! gf 5))
+  (assert-equal 11 (call/cb :+ gf 5))
   (assert-equal  6 (gf 5))
 
   (assert-equal 5.0 (gf 5.0))
-  (assert-equal 5.0 (call/cb +! gf 5.0))
-  (assert-equal 5.0 (call/cb *! gf 5.0))
+  (assert-equal 5.0 (call/cb :+ gf 5.0))
+  (assert-equal 5.0 (call/cb :* gf 5.0))
   ;; Make sure previous calls are undisturbed.
-  (assert-equal 5.0 (call/cb +! gf 5.0))
+  (assert-equal 5.0 (call/cb :+ gf 5.0))
   (assert-equal 5.0 (gf 5.0)))
 
 
@@ -42,20 +42,20 @@
   ;; Make sure the generic function is called a couple of times.
   (assert-equal  6   (gf 5))
   (assert-equal  5.0 (gf 5.0))
-  (assert-equal 11   (call/cb +! gf 5))
-  (assert-equal  5.0 (call/cb +! gf 5.0))
+  (assert-equal 11   (call/cb :+ gf 5))
+  (assert-equal  5.0 (call/cb :+ gf 5.0))
 
-  (change-method-combination gf min!)
+  (change-method-combination gf :min)
   (assert-equal 5 (gf 5))
   (assert-equal 5.0 (gf 5.0))
 
-  (change-method-combination gf max!)
+  (change-method-combination gf :max)
   (assert-equal 6 (gf 5))
   (assert-equal 5.0 (gf 5.0))
 
   ;; Make sure previous calls are undisturbed.
-  (assert-equal 11   (call/cb +! gf 5))
-  (assert-equal  5.0 (call/cb +! gf 5.0)))
+  (assert-equal 11   (call/cb :+ gf 5))
+  (assert-equal  5.0 (call/cb :+ gf 5.0)))
 
 
 (define-test update-main-combination
@@ -78,10 +78,10 @@
   (assert-equal -1   (gf2 5))
   (assert-equal -5.0 (gf2 5.0))
 
-  (assert-equal 11   (call/cb +! gf1 5))
-  (assert-equal  5.0 (call/cb +! gf1 5.0))
-  (assert-equal 11   (call/cb +! gf2 5))
-  (assert-equal  5.0 (call/cb +! gf2 5.0))
+  (assert-equal 11   (call/cb :+ gf1 5))
+  (assert-equal  5.0 (call/cb :+ gf1 5.0))
+  (assert-equal 11   (call/cb :+ gf2 5))
+  (assert-equal  5.0 (call/cb :+ gf2 5.0))
 
   (define-long-short-method-combination -!
     :operator - :identity-with-one-argument t)
@@ -92,10 +92,10 @@
   (assert-equal  5.0 (gf2 5.0))
 
   ;; Make sure previous calls are undisturbed.
-  (assert-equal 11   (call/cb +! gf1 5))
-  (assert-equal  5.0 (call/cb +! gf1 5.0))
-  (assert-equal 11   (call/cb +! gf2 5))
-  (assert-equal  5.0 (call/cb +! gf2 5.0)))
+  (assert-equal 11   (call/cb :+ gf1 5))
+  (assert-equal  5.0 (call/cb :+ gf1 5.0))
+  (assert-equal 11   (call/cb :+ gf2 5))
+  (assert-equal  5.0 (call/cb :+ gf2 5.0)))
 
 
 (define-test update-alternative-combination
@@ -141,15 +141,15 @@
   ;; Make sure the generic function is called a couple of times.
   (assert-equal  6   (gf 5))
   (assert-equal  5.0 (gf 5.0))
-  (assert-equal 11   (call/cb +! gf 5))
-  (assert-equal  5.0 (call/cb +! gf 5.0))
+  (assert-equal 11   (call/cb :+ gf 5))
+  (assert-equal  5.0 (call/cb :+ gf 5.0))
 
   (defmethod gf ((i fixnum)) (+ i 2))
 
   (assert-equal  7   (gf 5))
   (assert-equal  5.0 (gf 5.0))
-  (assert-equal 18   (call/cb +! gf 5))
-  (assert-equal  5.0 (call/cb +! gf 5.0)))
+  (assert-equal 18   (call/cb :+ gf 5))
+  (assert-equal  5.0 (call/cb :+ gf 5.0)))
 
 
 (define-test remove-method
@@ -161,15 +161,15 @@
   ;; Make sure the generic function is called a couple of times.
   (assert-equal  6   (gf 5))
   (assert-equal  5.0 (gf 5.0))
-  (assert-equal 11   (call/cb +! gf 5))
-  (assert-equal  5.0 (call/cb +! gf 5.0))
+  (assert-equal 11   (call/cb :+ gf 5))
+  (assert-equal  5.0 (call/cb :+ gf 5.0))
 
   (remove-method #'gf (find-method #'gf nil '(integer)))
 
   (assert-equal 5   (gf 5))
   (assert-equal 5.0 (gf 5.0))
-  (assert-equal 5   (call/cb +! gf 5))
-  (assert-equal 5.0 (call/cb +! gf 5.0)))
+  (assert-equal 5   (call/cb :+ gf 5))
+  (assert-equal 5.0 (call/cb :+ gf 5.0)))
 
 
 (defun test ()

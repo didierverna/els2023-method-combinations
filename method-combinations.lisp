@@ -1,29 +1,28 @@
 (defpackage :els2023-method-combinations
   (:use :cl)
   (:import-from :sb-mop
+    :find-method-combination-type
+    :short-method-combination :long-method-combination
     :funcallable-standard-class
     :generic-function-method-combination
-    :find-method-combination-type
     :update-generic-function-for-redefined-method-combination)
-  (:export :find-method-combination!
+  (:export :find-method-combination* :change-method-combination
 	   :define-long-short-method-combination
-	   :+! :*! :max! :min! :nconc! :progn! :and! :or! :list! :append!
 	   :generic-function! :generic-function!-p :defgeneric!
-	   :change-method-combination
 	   :call-with-combination :call/cb :install-#!-reader-macro))
 
 (in-package :els2023-method-combinations)
 
 
-;; ===================
-;; Method Combinations
-;; ===================
+;; =============================
+;; Method Combinations Utilities
+;; =============================
 
 ;; A better protocol to access method combination objects. This is merely a
 ;; duplication of my patched SBCL's code for FIND-METHOD-COMBINATION. There's
 ;; no point in implementing a SETF method here since those objects are handled
 ;; internally and automatically.
-(defun find-method-combination!
+(defun find-method-combination*
     (name &optional options (errorp t)
 	  &aux (type (find-method-combination-type name errorp)))
   "Find a method combination object for NAME and OPTIONS.
@@ -37,14 +36,19 @@ the combination again, regardless of the value of ERRORP."
 	      (funcall (sb-pcl::method-combination-%constructor type)
 		options)))))
 
-
-
-;; =======================================
-;; Build-In Long-Short Method Combinations
-;; =======================================
+(defmacro change-method-combination (function &rest combination)
+  "Change generic FUNCTION to a new method COMBINATION.
+- FUNCTION is a generic function designator.
+- COMBINATION is a method combination type name, potentially followed by
+arguments."
+  (when (symbolp function) (setq function `(function ,function)))
+  `(reinitialize-instance ,function
+     :method-combination
+     (find-method-combination* ',(car combination) ',(cdr combination))))
 
 (defmacro define-long-short-method-combination
-    (name &key documentation (operator name) identity-with-one-argument)
+    (name &key documentation (operator name) identity-with-one-argument
+	       (method-combination-class 'long-method-combination))
   "Define NAME as a long-short method combination.
 A long-short method combination resembles a short one, with the following
 differences:
@@ -59,6 +63,7 @@ differences:
 	(before (:before))
 	(primary () :order order :required t)
 	(after (:after)))
+       :method-combination-class ',method-combination-class
        ,@documentation
        (flet ((call-methods (methods)
 		(mapcar (lambda (method) `(call-method ,method)) methods)))
@@ -75,15 +80,21 @@ differences:
 	       ,(first around) (,@(rest around) (make-method ,form)))
 	     form))))))
 
+
+
+;; =======================================
+;; Build-In Long-Short Method Combinations
+;; =======================================
+
 (defmacro define-built-in-long-short-method-combinations ()
   "Define all built-in long-short method combinations.
-This defines +! *! max! min! list! append! nconc! progn! and! and or!.
+This defines :+ :* :max :min :list :append :nconc :progn :and and :or.
 Note that the standard doesn't define a * method combination, but we do."
   `(progn
      ,@(mapcar
 	(lambda (name)
 	  `(define-long-short-method-combination
-	       ,(intern (concatenate 'string (symbol-name name) "!"))
+	       ,(intern (symbol-name name) :keyword)
 	     :documentation
 	     ,(format nil "The ~A built-in long-short method combination."
 		name)
@@ -93,7 +104,7 @@ Note that the standard doesn't define a * method combination, but we do."
      ,@(mapcar
 	(lambda (name)
 	  `(define-long-short-method-combination
-	       ,(intern (concatenate 'string (symbol-name name) "!"))
+	       ,(intern (symbol-name name) :keyword)
 	     :documentation
 	     ,(format nil "The ~A built-in long-short method combination."
 		name)
@@ -158,16 +169,6 @@ missing."
      function
      (sb-pcl::method-combination-%generic-functions method-combination)))
   (call-next-method))
-
-(defmacro change-method-combination (function &rest combination)
-  "Change generic FUNCTION to a new method COMBINATION.
-- FUNCTION is a generic function designator.
-- COMBINATION is a method combination type name, potentially followed by
-arguments."
-  (when (symbolp function) (setq function `(function ,function)))
-  `(reinitialize-instance ,function
-     :method-combination
-     (find-method-combination! ',(car combination) ',(cdr combination))))
 
 
 ;; ----------------------------------------
@@ -236,7 +237,7 @@ discriminating function."
   (unless (consp combination) (setq combination (list combination)))
   (when (symbolp function) (setq function `(function ,function)))
   `(call-with-combination
-    (find-method-combination! ',(car combination) ',(cdr combination))
+    (find-method-combination* ',(car combination) ',(cdr combination))
     ,function
     ,@arguments))
 
