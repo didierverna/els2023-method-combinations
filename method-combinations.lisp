@@ -63,7 +63,7 @@ differences:
 	(before (:before))
 	(primary () :order order :required t)
 	(after (:after)))
-       :method-combination-class ',method-combination-class
+       (:method-combination-class ',method-combination-class)
        ,@documentation
        (flet ((call-methods (methods)
 		(mapcar (lambda (method) `(call-method ,method)) methods)))
