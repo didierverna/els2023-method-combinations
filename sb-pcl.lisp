@@ -1,10 +1,11 @@
 ;;; sb-pcl.lisp --- Method combination infrastructure reimplementation
 
 ;; #### WARNING: this code is meant to be loaded in a specific version of SBCL
-;; in which some standard and implementation-specific things related to method
-;; combinations have been renamed to get out of the way. This is necessary
-;; because the MOP forbids the redefinition of some classes of class
-;; meta-objects, which is exactly what we want to do here.
+;; (https://github.com/didierverna/sbcl/tree/els2023) in which some standard
+;; and implementation-specific things related to method combinations have been
+;; renamed to get out of the way. This is necessary because the MOP forbids
+;; the redefinition of some classes of class meta-objects, which is exactly
+;; what we want to do here.
 
 ;; Post ELS 2018, we don't need method combinators anymore, as SBCL correctly
 ;; handles generic functions and method combinations updates. The current
