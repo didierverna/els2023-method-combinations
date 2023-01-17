@@ -289,33 +289,6 @@ combination class."))
       either ~{the single qualifier ~S~^ or ~}.~@:>"
      method gf why type-name (short-method-combination-qualifiers type-name))))
 
-;; Overridden to allow a :method-combination-class argument. Note that
-;; contrary to DEFGENERIC for example, the standard doesn't allow
-;; implementations to extend DEFINE-METHOD-COMBINATION with additional keyword
-;; arguments. But then again, it doesn't explicitly forbids it either, and
-;; SBCL doesn't care, so it "just works" to leave it be. If this really is
-;; unacceptable, we can always provide a DEFINE-METHOD-COMBINATION-TYPE macro,
-;; which would be a better name anyway.
-(defun expand-short-defcombin (whole)
-  (let* ((canary (cons nil nil))
-	 (type-name (cadr whole))
-	 (documentation (getf (cddr whole) :documentation canary))
-	 (ioa (getf (cddr whole) :identity-with-one-argument nil))
-	 (operator
-	   (getf (cddr whole) :operator type-name))
-	 (class (getf (cddr whole) :method-combination-class
-		      'short-method-combination)))
-    (unless (or (eq documentation canary)
-		(stringp documentation))
-      (%program-error
-       "~@<~S argument to the short form of ~S must be a string.~:@>"
-       :documentation 'define-method-combination))
-    `(load-short-defcombin
-      ',type-name ',operator ',ioa
-      ',(and (neq documentation canary) documentation)
-      ',class
-      (sb-c:source-location))))
-
 ;; Replacement for both load-short-defcombin and short-combine-methods.
 (defun load-short-defcombin
     (name operator identity-with-one-argument documentation class
@@ -429,6 +402,41 @@ combination class."))
     (setf (slot-value new '%constructor)
 	  (lambda (options) (funcall #'make-instance new :options options)))
     (load-defcombin name new documentation)))
+
+
+;; Entry point
+;; -----------
+
+;; In commit b698d25316d7f959e59c4cb9f4865dd1a47d88c0, Doug has inlined
+;; EXPAND-SHORT-DEFCOMBIN here, so as to be able to create the built-in
+;; (short) method combinations in the same file as this macro's definition
+;; (originally src/pcl/defcombin.lisp). So we need to rewrite it to allow the
+;; new :method-combination-class argument. For long method combinations, it is
+;; handled in our redefinition of EXPAND-LONG-DEFCOMBIN, which see.
+(with-unlocked-packages (cl)
+  (defmacro define-method-combination (&whole form name . args)
+    (declare (ignore args))
+    (check-designator name 'define-method-combination)
+    `(progn
+       (with-single-package-locked-error
+	   (:symbol ',name "defining ~A as a method combination"))
+       ,(if (and (cddr form)
+		 (listp (caddr form)))
+	  (expand-long-defcombin form)
+	  (let* ((type-name (cadr form))
+		 (doc (getf (cddr form) :documentation (make-unbound-marker)))
+		 (ioa (getf (cddr form) :identity-with-one-argument nil))
+		 (operator (getf (cddr form) :operator type-name))
+		 (class (getf (cddr form) :method-combination-class
+			      'short-method-combination)))
+	    (unless (or (unbound-marker-p doc) (stringp doc))
+	      (%program-error
+	       "~@<~S argument to the short form of ~S must be a string.~:@>"
+	       :documentation 'define-method-combination))
+	    `(load-short-defcombin ',type-name ',operator ',ioa
+				   ,(unless (unbound-marker-p doc) doc)
+				   ',class
+				   (sb-c:source-location)))))))
 
 
 
