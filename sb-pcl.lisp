@@ -297,15 +297,15 @@ combination class."))
 ;; which would be a better name anyway.
 (defun expand-short-defcombin (whole)
   (let* ((canary (cons nil nil))
-         (type-name (cadr whole))
-         (documentation (getf (cddr whole) :documentation canary))
-         (ioa (getf (cddr whole) :identity-with-one-argument nil))
-         (operator
-           (getf (cddr whole) :operator type-name))
+	 (type-name (cadr whole))
+	 (documentation (getf (cddr whole) :documentation canary))
+	 (ioa (getf (cddr whole) :identity-with-one-argument nil))
+	 (operator
+	   (getf (cddr whole) :operator type-name))
 	 (class (getf (cddr whole) :method-combination-class
 		      'short-method-combination)))
     (unless (or (eq documentation canary)
-                (stringp documentation))
+		(stringp documentation))
       (%program-error
        "~@<~S argument to the short form of ~S must be a string.~:@>"
        :documentation 'define-method-combination))
@@ -372,12 +372,12 @@ combination class."))
 ;; which would be a better name anyway.
 (defun expand-long-defcombin (form)
   (let ((type-name (cadr form))
-        (lambda-list (caddr form))
-        (method-group-specifiers-presentp (cdddr form))
-        (method-group-specifiers (cadddr form))
-        (body (cddddr form))
-        (args-option ())
-        (gf-var nil)
+	(lambda-list (caddr form))
+	(method-group-specifiers-presentp (cdddr form))
+	(method-group-specifiers (cadddr form))
+	(body (cddddr form))
+	(args-option ())
+	(gf-var nil)
 	(mc-class 'long-method-combination))
     (unless method-group-specifiers-presentp
       (%program-error
@@ -387,20 +387,20 @@ combination class."))
       (setq args-option (cdr (pop body))))
     (when (and (consp (car body)) (eq (caar body) :generic-function))
       (unless (and (cdar body) (symbolp (cadar body)) (null (cddar body)))
-        (%program-error
+	(%program-error
 	 "~@<The argument to the ~S option of ~S must be a single symbol.~:@>"
-         :generic-function 'define-method-combination))
+	 :generic-function 'define-method-combination))
       (setq gf-var (cadr (pop body))))
     (when (and (consp (car body)) (eq (caar body) :method-combination-class))
       (unless (and (cdar body) (symbolp (cadar body)) (null (cddar body)))
-        (%program-error
+	(%program-error
 	 "~@<The argument to the ~S option of ~S must be a single symbol.~:@>"
-         :method-combination-class 'define-method-combination))
+	 :method-combination-class 'define-method-combination))
       (setq mc-class (cadr (pop body))))
     (multiple-value-bind (documentation function)
-        (make-long-method-combination-function
-         type-name lambda-list method-group-specifiers args-option gf-var
-         body)
+	(make-long-method-combination-function
+	 type-name lambda-list method-group-specifiers args-option gf-var
+	 body)
       `(load-long-defcombin
 	',type-name ',documentation #',function ',lambda-list
 	',args-option ',mc-class (sb-c:source-location)))))
