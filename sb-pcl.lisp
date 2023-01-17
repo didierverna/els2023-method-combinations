@@ -525,11 +525,10 @@ method combination."))
 	;; to access it like that than going through the info structure's
 	;; cache.
 	(method-combination-%generic-functions old))
-  (maphash (lambda (gf ignore)
-	     (declare (ignore ignore))
-	     (setf (generic-function-method-combination gf) new))
-	   ;; This, on the other hand, is the new method.
-	   (method-combination-%generic-functions new)))
+  (map-hashset (lambda (gf)
+		 (setf (generic-function-method-combination gf) new))
+	       ;; This, on the other hand, is the new method.
+	       (method-combination-%generic-functions new)))
 
 
 ;; Standard method combination
