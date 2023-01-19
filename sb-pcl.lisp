@@ -27,10 +27,10 @@
 
 
 (defgeneric update-generic-function-for-redefined-method-combination
-    (function combination)
+    (function previous current)
   (:documentation
-   "Inform generic FUNCTION that its method COMBINATION was redefined.")
-  (:method ((function generic-function) combination)
+   "Inform generic FUNCTION that its method combination was redefined.")
+  (:method ((function generic-function) previous current)
     "Flush the effective method cache and reinitialize FUNCTION."
     ;; This is just what SBCL does.
     (flush-effective-method-cache function)
@@ -211,7 +211,7 @@ combination class."))
   (map-hashset (lambda (gf)
 		 (declare (ignore ignore))
 		 (update-generic-function-for-redefined-method-combination
-		  gf current))
+		  gf previous current))
 	       (method-combination-%generic-functions current)))
 
 

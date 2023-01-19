@@ -176,17 +176,17 @@ missing."
 ;; ----------------------------------------
 
 (defmethod update-generic-function-for-redefined-method-combination
-    ((function generic-function!) combination)
-  "Either fall back to the default behavior when COMBINATION is FUNCTION's
-regular method combination, or invalidate the corresponding cached
+    ((function generic-function!) previous current)
+  "Either fall back to the default behavior when CURRENT combination is
+FUNCTION's regular method combination, or invalidate the corresponding cached
 discriminating function."
-    (if (eq combination (generic-function-method-combination function))
+    (if (eq current (generic-function-method-combination function))
       (call-next-method)
       ;; #### FIXME: do we need this or not ? It doesn't seem to affect the
       ;; tests and I don't currently understand SBCL's effective method
       ;; caches.
       ;; (sb-pcl::flush-effective-method-cache function)
-      (remhash combination (functions function))))
+      (remhash current (functions function))))
 
 
 ;; ------------------------
