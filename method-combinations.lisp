@@ -1,10 +1,11 @@
 (defpackage :els2023-method-combinations
   (:use :cl)
   (:import-from :sb-mop
-    :find-method-combination-type
-    :short-method-combination :long-method-combination
     :funcallable-standard-class
-    :generic-function-method-combination
+    :generic-function-method-combination)
+  (:import-from :sb-pcl
+    :find-method-combination-type
+    :long-method-combination
     :update-generic-function-for-redefined-method-combination)
   (:export :find-method-combination* :change-method-combination
 	   :define-long-short-method-combination
