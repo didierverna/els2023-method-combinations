@@ -6,6 +6,7 @@
   (:import-from :sb-pcl
     :find-method-combination-type
     :long-method-combination
+    :long-method-combination-type
     :update-generic-function-for-redefined-method-combination)
   (:export :find-method-combination* :change-method-combination
 	   :define-long-short-method-combination
@@ -49,7 +50,8 @@ arguments."
 
 (defmacro define-long-short-method-combination
     (name &key documentation (operator name) identity-with-one-argument
-	       (method-combination-class 'long-method-combination))
+	       (method-combination-class 'long-method-combination)
+	       (method-combination-type-class 'long-method-combination-type))
   "Define NAME as a long-short method combination.
 A long-short method combination resembles a short one, with the following
 differences:
@@ -65,6 +67,7 @@ differences:
 	(primary () :order order :required t)
 	(after (:after)))
        (:method-combination-class ,method-combination-class)
+       (:method-combination-type-class ,method-combination-type-class)
        ,@documentation
        (flet ((call-methods (methods)
 		(mapcar (lambda (method) `(call-method ,method)) methods)))
