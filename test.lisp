@@ -59,7 +59,7 @@
 
 
 (define-test update-main-combination
-  (define-long-short-method-combination -! :operator -)
+  (define-medium-method-combination-type -! :operator -)
 
   (fmakunbound 'gf1)
   (defgeneric! gf1 (i)
@@ -83,7 +83,7 @@
   (assert-equal 11   (call/cb :+ gf2 5))
   (assert-equal  5.0 (call/cb :+ gf2 5.0))
 
-  (define-long-short-method-combination -!
+  (define-medium-method-combination-type -!
     :operator - :identity-with-one-argument t)
 
   (assert-equal  1   (gf1 5))
@@ -99,7 +99,7 @@
 
 
 (define-test update-alternative-combination
-  (define-long-short-method-combination -! :operator -)
+  (define-medium-method-combination-type -! :operator -)
 
   (fmakunbound 'gf)
   (defgeneric! gf (i)
@@ -119,7 +119,7 @@
   (assert-equal 6 (gf 5))
   (assert-equal 5.0 (gf 5.0))
 
-  (define-long-short-method-combination -!
+  (define-medium-method-combination-type -!
     :operator - :identity-with-one-argument t)
 
   (assert-equal  1   (call/cb -! gf 5))

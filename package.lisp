@@ -9,6 +9,6 @@
     :long-method-combination-type
     :update-generic-function-for-redefined-method-combination)
   (:export :find-method-combination* :change-method-combination
-	   :define-long-short-method-combination
+	   :define-medium-method-combination-type
 	   :generic-function! :generic-function!-p :defgeneric!
 	   :call-with-combination :call/cb :install-#!-reader-macro))
