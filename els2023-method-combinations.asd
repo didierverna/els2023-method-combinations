@@ -14,3 +14,11 @@ idea."
 	       (:file "util")
 	       (:file "medium")
 	       (:file "alternative")))
+
+(asdf:defsystem :els2023-method-combinations/test
+  :depends-on (:els2023-method-combinations :lisp-unit)
+  :components ((:file "test")))
+
+(asdf:defsystem :els2023-method-combinations/bench
+  :depends-on (:els2023-method-combinations)
+  :components ((:file "bench")))

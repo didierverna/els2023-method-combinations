@@ -1,6 +1,3 @@
-(eval-when (:compile-toplevel :load-toplevel :execute)
-  (asdf:load-system :lisp-unit))
-
 (defpackage :els2023-method-combinations/test
   (:use :cl :els2023-method-combinations :lisp-unit)
   (:export :test))
