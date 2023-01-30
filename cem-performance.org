@@ -1,0 +1,39 @@
+* Original SBCL:
+** Short CEM
+Evaluation took:
+  0.966 seconds of real time
+  0.939566 seconds of total run time (0.921852 user, 0.017714 system)
+  [ Run times consist of 0.066 seconds GC time, and 0.874 seconds non-GC time. ]
+  97.31% CPU
+  3,292,908,450 processor cycles
+  3 page faults
+  2,559,998,896 bytes consed
+** Long CEM
+Evaluation took:
+  1.767 seconds of real time
+  1.763214 seconds of total run time (1.751465 user, 0.011749 system)
+  [ Run times consist of 0.074 seconds GC time, and 1.690 seconds non-GC time. ]
+  99.77% CPU
+  6,025,005,612 processor cycles
+  2 page faults
+  2,559,148,912 bytes consed
+
+* Forked SBCL:
+** Short CEM
+Evaluation took:
+  1.215 seconds of real time
+  1.211799 seconds of total run time (1.192694 user, 0.019105 system)
+  [ Run times consist of 0.070 seconds GC time, and 1.142 seconds non-GC time. ]
+  99.75% CPU
+  4,141,937,892 processor cycles
+  3 page faults
+  2,560,001,008 bytes consed
+** Long CEM
+Evaluation took:
+  1.753 seconds of real time
+  1.729143 seconds of total run time (1.713713 user, 0.015430 system)
+  [ Run times consist of 0.078 seconds GC time, and 1.652 seconds non-GC time. ]
+  98.63% CPU
+  5,976,367,236 processor cycles
+  2 page faults
+  2,559,139,216 bytes consed
