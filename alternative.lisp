@@ -7,10 +7,10 @@
 ;; ==========================
 
 (defclass generic-function! (standard-generic-function)
-  ((functions :documentation "The discriminating functions cache.
+  ((%functions :documentation "The discriminating functions cache.
 This is a hash table mapping method combinations to discriminating functions."
 	      :initform (make-hash-table)
-	      :reader functions))
+	      :reader %functions))
   (:metaclass funcallable-standard-class)
   (:documentation "Meta-class for extended generic functions."))
 
@@ -38,12 +38,12 @@ missing."
 (defmethod add-method :after
     ((function generic-function!) method)
   "Invalidate all cached discriminating functions."
-  (clrhash (functions function)))
+  (clrhash (%functions function)))
 
 (defmethod remove-method :after
     ((function generic-function!) method)
   "Invalidate all cached discriminating functions."
-  (clrhash (functions function)))
+  (clrhash (%functions function)))
 
 
 ;; -------------------------
@@ -66,7 +66,7 @@ missing."
   (when (and method-combination-p
 	     (not (eq method-combination
 		      (generic-function-method-combination function))))
-    (remhash method-combination (functions function))
+    (remhash method-combination (%functions function))
     (sb-pcl::remove-from-weak-hashset
      function
      (sb-pcl::method-combination-%generic-functions method-combination)))
@@ -88,7 +88,7 @@ discriminating function."
       ;; tests and I don't currently understand SBCL's effective method
       ;; caches.
       ;; (sb-pcl::flush-effective-method-cache function)
-      (remhash current (functions function))))
+      (remhash current (%functions function))))
 
 
 
@@ -104,7 +104,7 @@ discriminating function."
   "Call generic FUNCTION on ARGUMENTS with alternative method COMBINATION."
   (if (eq combination default-combination)
     (apply function arguments)
-    (let ((alternative (gethash combination (functions function))))
+    (let ((alternative (gethash combination (%functions function))))
       (if alternative
 	(apply alternative arguments)
 	(let (values)
@@ -117,7 +117,7 @@ discriminating function."
 		alternative (sb-kernel::%funcallable-instance-fun function))
 	  (reinitialize-instance function
 	    :method-combination default-combination)
-	  (setf (gethash combination (functions function)) alternative)
+	  (setf (gethash combination (%functions function)) alternative)
 	  (sb-pcl::add-to-weak-hashset
 	   function
 	   (sb-pcl::method-combination-%generic-functions combination))
