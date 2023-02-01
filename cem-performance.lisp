@@ -1,19 +1,40 @@
 (defgeneric short-gf (a)
   (:method-combination progn)
+  (:method progn (a) (print t))
   (:method progn ((a number)) (print 'number))
+  (:method progn ((a real)) (print 'real))
+  (:method progn ((a rational)) (print 'rational))
   (:method progn ((a integer)) (print 'integer))
-  (:method progn ((a fixnum)) (print 'fixnum))
-  (:method progn ((a float)) (print 'float)))
+  (:method progn ((a fixnum)) (print 'fixnum)))
 
 (let ((method-combination
 	(sb-mop:generic-function-method-combination #'short-gf))
-      (applicable-methods
-	(list (find-method #'short-gf '(progn) (list (find-class 'number)))
+      (am1
+	(list (find-method #'short-gf '(progn) (list (find-class t)))))
+      (am3
+	(list (find-method #'short-gf '(progn) (list (find-class t)))
+	      (find-method #'short-gf '(progn) (list (find-class 'number)))
+	      (find-method #'short-gf '(progn) (list (find-class 'real)))))
+      (am6
+	(list (find-method #'short-gf '(progn) (list (find-class t)))
+	      (find-method #'short-gf '(progn) (list (find-class 'number)))
+	      (find-method #'short-gf '(progn) (list (find-class 'real)))
+	      (find-method #'short-gf '(progn) (list (find-class 'rational)))
 	      (find-method #'short-gf '(progn) (list (find-class 'integer)))
 	      (find-method #'short-gf '(progn) (list (find-class 'fixnum))))))
+  (format t "** Short method combination~%")
+  (format t "*** 1 applicable method~%")
   (time (loop :repeat 10000000
 	      :do (sb-mop:compute-effective-method
-		   #'short-gf method-combination applicable-methods))))
+		   #'short-gf method-combination am1)))
+  (format t "*** 3 applicable method~%")
+  (time (loop :repeat 10000000
+	      :do (sb-mop:compute-effective-method
+		   #'short-gf method-combination am3)))
+  (format t "*** 6 applicable method~%")
+  (time (loop :repeat 10000000
+	      :do (sb-mop:compute-effective-method
+		   #'short-gf method-combination am6))))
 
 
 (define-method-combination long-progn (&optional (order :most-specific-first))
@@ -38,17 +59,38 @@
 
 (defgeneric long-gf (a)
   (:method-combination long-progn)
+  (:method progn (a) (print t))
   (:method progn ((a number)) (print 'number))
+  (:method progn ((a real)) (print 'real))
+  (:method progn ((a rational)) (print 'rational))
   (:method progn ((a integer)) (print 'integer))
-  (:method progn ((a fixnum)) (print 'fixnum))
-  (:method progn ((a float)) (print 'float)))
+  (:method progn ((a fixnum)) (print 'fixnum)))
 
 (let ((method-combination
 	(sb-mop:generic-function-method-combination #'long-gf))
-      (applicable-methods
-	(list (find-method #'long-gf '(progn) (list (find-class 'number)))
+      (am1
+	(list (find-method #'long-gf '(progn) (list (find-class t)))))
+      (am3
+	(list (find-method #'long-gf '(progn) (list (find-class t)))
+	      (find-method #'long-gf '(progn) (list (find-class 'number)))
+	      (find-method #'long-gf '(progn) (list (find-class 'real)))))
+      (am6
+	(list (find-method #'long-gf '(progn) (list (find-class t)))
+	      (find-method #'long-gf '(progn) (list (find-class 'number)))
+	      (find-method #'long-gf '(progn) (list (find-class 'real)))
+	      (find-method #'long-gf '(progn) (list (find-class 'rational)))
 	      (find-method #'long-gf '(progn) (list (find-class 'integer)))
 	      (find-method #'long-gf '(progn) (list (find-class 'fixnum))))))
+  (format t "** Long method combination~%")
+  (format t "*** 1 applicable method~%")
   (time (loop :repeat 10000000
 	      :do (sb-mop:compute-effective-method
-		   #'long-gf method-combination applicable-methods))))
+		   #'long-gf method-combination am1)))
+  (format t "*** 3 applicable method~%")
+  (time (loop :repeat 10000000
+	      :do (sb-mop:compute-effective-method
+		   #'long-gf method-combination am3)))
+  (format t "*** 6 applicable method~%")
+  (time (loop :repeat 10000000
+	      :do (sb-mop:compute-effective-method
+		   #'long-gf method-combination am6))))

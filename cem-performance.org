@@ -1,39 +1,116 @@
-* Original SBCL:
-** Short CEM
+* Original SBCL
+** Short method combination
+*** 1 applicable method
 Evaluation took:
-  0.966 seconds of real time
-  0.939566 seconds of total run time (0.921852 user, 0.017714 system)
-  [ Run times consist of 0.066 seconds GC time, and 0.874 seconds non-GC time. ]
-  97.31% CPU
-  3,292,908,450 processor cycles
-  3 page faults
-  2,559,998,896 bytes consed
-** Long CEM
-Evaluation took:
-  1.767 seconds of real time
-  1.763214 seconds of total run time (1.751465 user, 0.011749 system)
-  [ Run times consist of 0.074 seconds GC time, and 1.690 seconds non-GC time. ]
-  99.77% CPU
-  6,025,005,612 processor cycles
-  2 page faults
-  2,559,148,912 bytes consed
+  0.564 seconds of real time
+  0.563144 seconds of total run time (0.549457 user, 0.013687 system)
+  [ Run times consist of 0.025 seconds GC time, and 0.539 seconds non-GC time. ]
+  99.82% CPU
+  1,922,317,922 processor cycles
+  960,002,608 bytes consed
 
-* Forked SBCL:
-** Short CEM
+*** 3 applicable method
 Evaluation took:
-  1.215 seconds of real time
-  1.211799 seconds of total run time (1.192694 user, 0.019105 system)
-  [ Run times consist of 0.070 seconds GC time, and 1.142 seconds non-GC time. ]
+  0.905 seconds of real time
+  0.904477 seconds of total run time (0.897117 user, 0.007360 system)
+  [ Run times consist of 0.070 seconds GC time, and 0.835 seconds non-GC time. ]
+  99.89% CPU
+  3,087,214,022 processor cycles
+  2,559,994,368 bytes consed
+
+*** 6 applicable method
+Evaluation took:
+  1.354 seconds of real time
+  1.351876 seconds of total run time (1.337536 user, 0.014340 system)
+  [ Run times consist of 0.124 seconds GC time, and 1.228 seconds non-GC time. ]
+  99.85% CPU
+  4,616,376,834 processor cycles
+  4,480,018,912 bytes consed
+
+** Long method combination.
+*** 1 applicable method
+Evaluation took:
+  0.903 seconds of real time
+  0.901005 seconds of total run time (0.896484 user, 0.004521 system)
+  [ Run times consist of 0.027 seconds GC time, and 0.875 seconds non-GC time. ]
+  99.78% CPU
+  3,077,793,932 processor cycles
+  959,730,640 bytes consed
+
+*** 3 applicable method
+Evaluation took:
+  1.780 seconds of real time
+  1.775524 seconds of total run time (1.764622 user, 0.010902 system)
+  [ Run times consist of 0.077 seconds GC time, and 1.699 seconds non-GC time. ]
+  99.78% CPU
+  6,068,471,836 processor cycles
+  2,559,138,064 bytes consed
+
+*** 6 applicable method
+Evaluation took:
+  3.206 seconds of real time
+  3.197379 seconds of total run time (3.177860 user, 0.019519 system)
+  [ Run times consist of 0.132 seconds GC time, and 3.066 seconds non-GC time. ]
+  99.72% CPU
+  10,926,603,556 processor cycles
+  4,477,984,000 bytes consed
+
+* Forked SBCL
+** Short method combination
+*** 1 applicable method
+Evaluation took:
+  0.841 seconds of real time
+  0.836367 seconds of total run time (0.832808 user, 0.003559 system)
+  [ Run times consist of 0.035 seconds GC time, and 0.802 seconds non-GC time. ]
+  99.41% CPU
+  2,869,481,682 processor cycles
+  9 page faults
+  960,004,912 bytes consed
+
+*** 3 applicable method
+Evaluation took:
+  1.214 seconds of real time
+  1.210924 seconds of total run time (1.202391 user, 0.008533 system)
+  [ Run times consist of 0.096 seconds GC time, and 1.115 seconds non-GC time. ]
   99.75% CPU
-  4,141,937,892 processor cycles
+  4,139,223,818 processor cycles
   3 page faults
-  2,560,001,008 bytes consed
-** Long CEM
+  2,559,994,384 bytes consed
+
+*** 6 applicable method
 Evaluation took:
-  1.753 seconds of real time
-  1.729143 seconds of total run time (1.713713 user, 0.015430 system)
-  [ Run times consist of 0.078 seconds GC time, and 1.652 seconds non-GC time. ]
-  98.63% CPU
-  5,976,367,236 processor cycles
-  2 page faults
-  2,559,139,216 bytes consed
+  1.671 seconds of real time
+  1.668211 seconds of total run time (1.653093 user, 0.015118 system)
+  [ Run times consist of 0.169 seconds GC time, and 1.500 seconds non-GC time. ]
+  99.82% CPU
+  5,698,019,568 processor cycles
+  4,480,018,976 bytes consed
+
+** Long method combination
+*** 1 applicable method
+Evaluation took:
+  0.866 seconds of real time
+  0.864450 seconds of total run time (0.843688 user, 0.020762 system)
+  [ Run times consist of 0.047 seconds GC time, and 0.818 seconds non-GC time. ]
+  99.77% CPU
+  2,953,146,924 processor cycles
+  1 page fault
+  959,721,520 bytes consed
+
+*** 3 applicable method
+Evaluation took:
+  1.772 seconds of real time
+  1.767052 seconds of total run time (1.755544 user, 0.011508 system)
+  [ Run times consist of 0.103 seconds GC time, and 1.665 seconds non-GC time. ]
+  99.72% CPU
+  6,039,741,126 processor cycles
+  2,559,151,552 bytes consed
+
+*** 6 applicable method
+Evaluation took:
+  3.136 seconds of real time
+  3.118205 seconds of total run time (3.097244 user, 0.020961 system)
+  [ Run times consist of 0.179 seconds GC time, and 2.940 seconds non-GC time. ]
+  99.43% CPU
+  10,689,909,388 processor cycles
+  4,477,952,192 bytes consed
