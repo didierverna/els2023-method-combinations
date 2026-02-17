@@ -8,6 +8,23 @@
 ;; DEFGENERIC[!] may preserve some state (e.g. updated method combinations,
 ;; added methods, etc.).
 
+(define-test standard
+
+  (assert-true (find-method-combination-type 'standard))
+  (assert-true (find-method-combination* 'standard))
+  (assert-error 'error (find-method-combination* 'standard '(:dummy) nil))
+  (assert-true (typep (find-method-combination* 'standard)
+		      'standard-method-combination))
+
+  (assert-true (find-method-combination-type 'or))
+  (assert-true (find-method-combination* 'or))
+  (assert-true (find-method-combination* 'or '(:most-specific-first)))
+  (assert-true (find-method-combination* 'or '(:most-specific-last)))
+  (assert-error 'error (find-method-combination* 'or '(:dummy)))
+  (assert-true (typep (find-method-combination* 'or)
+		      'short-method-combination)))
+
+
 (define-test basic
   (fmakunbound 'gf)
   (defgeneric! gf (i)
