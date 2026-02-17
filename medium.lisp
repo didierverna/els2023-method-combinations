@@ -18,7 +18,7 @@ differences:
 (defmethod print-object ((type medium-method-combination-type) stream)
   (print-unreadable-object (type stream :type t :identity t)
     (format stream "~S (~S ~S)"
-      (sb-pcl:method-combination-type-name type)
+      (method-combination-type-name type)
       (operator type)
       (identity-with-one-argument type))))
 

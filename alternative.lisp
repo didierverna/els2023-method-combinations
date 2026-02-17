@@ -67,9 +67,13 @@ missing."
 	     (not (eq method-combination
 		      (generic-function-method-combination function))))
     (remhash method-combination (%functions function))
-    (sb-pcl::remove-from-weak-hashset
-     function
-     (sb-pcl::method-combination-%generic-functions method-combination)))
+    #+sbcl (sb-pcl::remove-from-weak-hashset
+	    function
+	    (sb-pcl::method-combination-%generic-functions method-combination))
+    #+ecl (setf (clos::method-combination-%generic-functions method-combination)
+		(remove function
+			(clos::method-combination-%generic-functions
+			 method-combination))))
   (call-next-method))
 
 
@@ -113,14 +117,16 @@ discriminating function."
 	  ;; REINITIALIZE-INSTANCE twice like that. The potential gain may not
 	  ;; be worth it however.
 	  (reinitialize-instance function :method-combination combination)
-	  (setq values (multiple-value-list (apply function arguments))
-		alternative (sb-kernel::%funcallable-instance-fun function))
+	  (setq values (multiple-value-list (apply function arguments)))
+	  #+sbcl (setq alternative (sb-kernel::%funcallable-instance-fun function))
 	  (reinitialize-instance function
 	    :method-combination default-combination)
 	  (setf (gethash combination (%functions function)) alternative)
-	  (sb-pcl::add-to-weak-hashset
-	   function
-	   (sb-pcl::method-combination-%generic-functions combination))
+	  #+sbcl (sb-pcl::add-to-weak-hashset
+		  function
+		  (sb-pcl::method-combination-%generic-functions combination))
+	  #+ecl (push function
+		      (clos::method-combination-%generic-functions combination))
 	  (values-list values))))))
 
 (defmacro call/cb (combination function &rest arguments)
