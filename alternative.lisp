@@ -69,10 +69,10 @@ missing."
     (remhash method-combination (%functions function))
     #+sbcl (sb-pcl::remove-from-weak-hashset
 	    function
-	    (sb-pcl::method-combination-%generic-functions method-combination))
-    #+ecl (setf (clos::method-combination-%generic-functions method-combination)
+	    (method-combination-%generic-functions method-combination))
+    #+ecl (setf (method-combination-%generic-functions method-combination)
 		(remove function
-			(clos::method-combination-%generic-functions
+			(method-combination-%generic-functions
 			 method-combination))))
   (call-next-method))
 
@@ -124,9 +124,9 @@ discriminating function."
 	  (setf (gethash combination (%functions function)) alternative)
 	  #+sbcl (sb-pcl::add-to-weak-hashset
 		  function
-		  (sb-pcl::method-combination-%generic-functions combination))
+		  (method-combination-%generic-functions combination))
 	  #+ecl (push function
-		      (clos::method-combination-%generic-functions combination))
+		      (method-combination-%generic-functions combination))
 	  (values-list values))))))
 
 (defmacro call/cb (combination function &rest arguments)

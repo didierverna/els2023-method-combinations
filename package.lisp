@@ -8,6 +8,9 @@
     :long-method-combination
     :long-method-combination-type
     :method-combination-type-name
+    :method-combination-%constructor
+    :method-combination-%generic-functions
+    :method-combination-type-%cache
     :update-generic-function-for-redefined-method-combination)
   (:export :find-method-combination* :change-method-combination
 	   :define-medium-method-combination-type

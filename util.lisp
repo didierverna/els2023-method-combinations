@@ -14,15 +14,9 @@ found. Otherwise, return NIL. Note that when a NAMEd method combination type
 exists, asking for a new set of (conformant) OPTIONS will always instantiate
 the combination again, regardless of the value of ERRORP."
   (when type
-    (or (gethash options
-		 #+sbcl (sb-pcl::method-combination-type-%cache type)
-		 #+ecl (clos::method-combination-type-%instances type))
-	(setf (gethash options
-		       #+sbcl (sb-pcl::method-combination-type-%cache type)
-		       #+ecl (clos::method-combination-type-%instances type))
-	      (funcall #+sbcl (sb-pcl::method-combination-%constructor type)
-		       #+ecl (clos::method-combination-%constructor type)
-		options)))))
+    (or (gethash options (method-combination-type-%instances type))
+	(setf (gethash options (method-combination-type-%instances type))
+	      (funcall (method-combination-%constructor type) options)))))
 
 (defmacro change-method-combination (function &rest combination)
   "Change generic FUNCTION to a new method COMBINATION.
