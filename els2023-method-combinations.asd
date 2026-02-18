@@ -24,5 +24,4 @@ idea."
   :components ((:file "funcall-bench")))
 
 (asdf:defsystem :els2023-method-combinations/cem-bench
-  :depends-on (:els2023-method-combinations)
   :components ((:file "cem-bench")))

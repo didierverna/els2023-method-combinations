@@ -1,6 +1,5 @@
 (defpackage :els2023-method-combinations/cem-bench
-  (:use :cl #+sbcl :sb-mop #+sbcl :sb-pcl #+ecl :clos
-	:els2023-method-combinations)
+  (:use :cl #+sbcl :sb-mop #+sbcl :sb-pcl #+ecl :clos)
   (:export :cem-bench))
 
 (in-package :els2023-method-combinations/cem-bench)
