@@ -1,8 +1,8 @@
-(defpackage :els2023-method-combinations/bench
+(defpackage :els2023-method-combinations/funcall-bench
   (:use :cl :els2023-method-combinations)
-  (:export :bench))
+  (:export :funcall-bench))
 
-(in-package :els2023-method-combinations/bench)
+(in-package :els2023-method-combinations/funcall-bench)
 
 
 (defgeneric test1/raw (i)
@@ -59,7 +59,7 @@
   (:method ((i fixnum)) (format t "Fixnum ~A.~%" i)))
 
 
-(defun bench ()
+(defun funcall-bench ()
   (let ((iterations 100000000)
 	;; Save one hash table lookup.
 	(+-combination (find-method-combination* :+)))

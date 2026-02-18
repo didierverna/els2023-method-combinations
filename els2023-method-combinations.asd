@@ -19,6 +19,6 @@ idea."
   :depends-on (:els2023-method-combinations :lisp-unit)
   :components ((:file "test")))
 
-(asdf:defsystem :els2023-method-combinations/bench
+(asdf:defsystem :els2023-method-combinations/funcall-bench
   :depends-on (:els2023-method-combinations)
-  :components ((:file "bench")))
+  :components ((:file "funcall-bench")))
