@@ -24,7 +24,14 @@
   ;; #### NOTE: SBCL checks the validity of the arguments. ECL doesn't.
   ;; (assert-error 'error (find-method-combination* 'or '(:dummy)))
   (assert-true (typep (find-method-combination* 'or)
-		      'short-method-combination)))
+		      'short-method-combination))
+
+  (assert-error 'error
+    (define-method-combination dummy
+      :method-combination-class long-method-combination))
+  (assert-error 'error
+    (define-method-combination dummy () ()
+      (:method-combination-class short-method-combination))))
 
 
 (define-test basic
