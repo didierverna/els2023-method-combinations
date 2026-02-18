@@ -21,7 +21,8 @@
   (assert-true (find-method-combination* 'or))
   (assert-true (find-method-combination* 'or '(:most-specific-first)))
   (assert-true (find-method-combination* 'or '(:most-specific-last)))
-  (assert-error 'error (find-method-combination* 'or '(:dummy)))
+  ;; #### NOTE: SBCL checks the validity of the arguments. ECL doesn't.
+  ;; (assert-error 'error (find-method-combination* 'or '(:dummy)))
   (assert-true (typep (find-method-combination* 'or)
 		      'short-method-combination)))
 
