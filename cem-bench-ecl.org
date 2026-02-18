@@ -1,0 +1,67 @@
+* Original ECL
+** Short method combination
+*** 1 applicable method
+real time : 12.095 secs
+run time  : 13.716 secs
+gc count  : 274 times
+consed    : 3520000528 bytes
+*** 3 applicable method
+real time : 56.230 secs
+run time  : 63.127 secs
+gc count  : 1200 times
+consed    : 15679999888 bytes
+*** 6 applicable method
+real time : 95.573 secs
+run time  : 105.205 secs
+gc count  : 1772 times
+consed    : 22399999392 bytes
+** Long method combination
+*** 1 applicable method
+real time : 11.000 secs
+run time  : 11.984 secs
+gc count  : 183 times
+consed    : 2239998592 bytes
+*** 3 applicable method
+real time : 55.641 secs
+run time  : 62.364 secs
+gc count  : 1161 times
+consed    : 15200001712 bytes
+*** 6 applicable method
+real time : 96.573 secs
+run time  : 104.624 secs
+gc count  : 1692 times
+consed    : 21439999408 bytes
+
+* Forked ECL
+** Short method combination
+*** 1 applicable method
+real time : 12.369 secs
+run time  : 14.168 secs
+gc count  : 294 times
+consed    : 3520003888 bytes
+*** 3 applicable method
+real time : 55.955 secs
+run time  : 63.596 secs
+gc count  : 1274 times
+consed    : 15680003760 bytes
+*** 6 applicable method
+real time : 95.107 secs
+run time  : 106.002 secs
+gc count  : 1871 times
+consed    : 22400001632 bytes
+** Long method combination
+*** 1 applicable method
+real time : 11.567 secs
+run time  : 12.607 secs
+gc count  : 195 times
+consed    : 2240003040 bytes
+*** 3 applicable method
+real time : 55.921 secs
+run time  : 63.341 secs
+gc count  : 1234 times
+consed    : 15200002112 bytes
+*** 6 applicable method
+real time : 93.934 secs
+run time  : 104.471 secs
+gc count  : 1786 times
+consed    : 21440007936 bytes
