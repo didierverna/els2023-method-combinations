@@ -193,6 +193,84 @@
   (assert-eql 5   (call/cb :+ gf 5))
   (assert-eql 5.0 (call/cb :+ gf 5.0)))
 
+(define-test documentation
+  (defparameter *smct*
+    (define-method-combination smct
+      :operator progn :documentation "The SMCT method combination."))
+  (defparameter *mmct*
+    (define-medium-method-combination-type mmct
+      :operator progn :documentation "The MMCT method combination."))
+
+  (defparameter *an-smct* (find-method-combination* 'smct :most-specific-last))
+  (defparameter *an-mmct* (find-method-combination* 'mmct :most-specific-last))
+
+  (assert-equal (documentation 'smct 'method-combination)
+		"The SMCT method combination.")
+  (assert-equal (documentation 'mmct 'method-combination)
+		"The MMCT method combination.")
+
+  (assert-equal (documentation *smct* t) "The SMCT method combination.")
+  (assert-equal (documentation *mmct* t) "The MMCT method combination.")
+
+  (assert-equal (documentation *an-smct* t) "The SMCT method combination.")
+  (assert-equal (documentation *an-mmct* t) "The MMCT method combination.")
+
+  (assert-equal (documentation *an-smct* 'method-combination)
+		"The SMCT method combination.")
+  (assert-equal (documentation *an-mmct* 'method-combination)
+		"The MMCT method combination.")
+
+  (setf (documentation 'smct 'method-combination) "SMCT")
+  (setf (documentation 'mmct 'method-combination) "MMCT")
+
+  (assert-equal (documentation 'smct 'method-combination) "SMCT")
+  (assert-equal (documentation 'mmct 'method-combination) "MMCT")
+  (assert-equal (documentation *smct* t) "SMCT")
+  (assert-equal (documentation *mmct* t) "MMCT")
+  (assert-equal (documentation *an-smct* t) "SMCT")
+  (assert-equal (documentation *an-mmct* t) "MMCT")
+  (assert-equal (documentation *an-smct* 'method-combination) "SMCT")
+  (assert-equal (documentation *an-mmct* 'method-combination) "MMCT")
+
+  (setf (documentation *smct* t) "SMCT 1")
+  (setf (documentation *mmct* t) "MMCT 1")
+
+  (assert-equal (documentation 'smct 'method-combination) "SMCT 1")
+  (assert-equal (documentation 'mmct 'method-combination) "MMCT 1")
+  (assert-equal (documentation *smct* t) "SMCT 1")
+  (assert-equal (documentation *mmct* t) "MMCT 1")
+  (assert-equal (documentation *an-smct* t) "SMCT 1")
+  (assert-equal (documentation *an-mmct* t) "MMCT 1")
+  (assert-equal (documentation *an-smct* 'method-combination) "SMCT 1")
+  (assert-equal (documentation *an-mmct* 'method-combination) "MMCT 1")
+
+  (setf (documentation *an-smct* t) "SMCT 2")
+  (setf (documentation *an-mmct* 'method-combination) "MMCT 2")
+
+  (assert-equal (documentation 'smct 'method-combination) "SMCT 2")
+  (assert-equal (documentation 'mmct 'method-combination) "MMCT 2")
+  (assert-equal (documentation *smct* t) "SMCT 2")
+  (assert-equal (documentation *mmct* t) "MMCT 2")
+  (assert-equal (documentation *an-smct* t) "SMCT 2")
+  (assert-equal (documentation *an-mmct* t) "MMCT 2")
+  (assert-equal (documentation *an-smct* 'method-combination) "SMCT 2")
+  (assert-equal (documentation *an-mmct* 'method-combination) "MMCT 2")
+
+  (setf (documentation (find-method-combination* 'smct :most-specific-first)
+		       t)
+	"SMCT 3")
+  (setf (documentation (find-method-combination* 'mmct :most-specific-first)
+		       'method-combination)
+	"MMCT 3")
+
+  (assert-equal (documentation 'smct 'method-combination) "SMCT 3")
+  (assert-equal (documentation 'mmct 'method-combination) "MMCT 3")
+  (assert-equal (documentation *smct* t) "SMCT 3")
+  (assert-equal (documentation *mmct* t) "MMCT 3")
+  (assert-equal (documentation *an-smct* t) "SMCT 3")
+  (assert-equal (documentation *an-mmct* t) "MMCT 3")
+  (assert-equal (documentation *an-smct* 'method-combination) "SMCT 3")
+  (assert-equal (documentation *an-mmct* 'method-combination) "MMCT 3"))
 
 (defun test ()
   (let ((lisp-unit:*print-failures* t))
