@@ -194,13 +194,13 @@
   (assert-eql 5.0 (call/cb :+ gf 5.0)))
 
 (define-test documentation
-  (defparameter *smct*
-    (define-method-combination smct
-      :operator progn :documentation "The SMCT method combination."))
-  (defparameter *mmct*
-    (define-medium-method-combination-type mmct
-      :operator progn :documentation "The MMCT method combination."))
+  (define-method-combination smct
+    :operator progn :documentation "The SMCT method combination.")
+  (define-medium-method-combination-type mmct
+    :operator progn :documentation "The MMCT method combination.")
 
+  (defparameter *smct* (find-method-combination-type 'smct))
+  (defparameter *mmct* (find-method-combination-type 'mmct))
   (defparameter *an-smct* (find-method-combination* 'smct :most-specific-last))
   (defparameter *an-mmct* (find-method-combination* 'mmct :most-specific-last))
 
