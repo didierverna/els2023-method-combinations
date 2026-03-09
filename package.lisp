@@ -1,6 +1,6 @@
 (defpackage :els2023-method-combinations
-  (:use :cl #+sbcl :sb-mop #+sbcl :sb-pcl #+ecl :clos)
-  (:import-from #+sbcl :sb-pcl #+ecl :clos
+  (:use :cl #+sbcl :sb-mop #+sbcl :sb-pcl #+ecl :clos #+abcl :mop)
+  (:import-from #+sbcl :sb-pcl #+ecl :clos #+abcl :mop
 		:method-combination-%constructor
 		:method-combination-%generic-functions
 		:method-combination-type-%instances)

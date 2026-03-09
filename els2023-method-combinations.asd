@@ -8,7 +8,7 @@ idea."
   :author "Didier Verna"
   :mailto "didier@didierverna.net"
   :source-control "https://github.com/didierverna/els2023-method-combinations"
-  :if-feature (:or :sbcl :ecl)
+  :if-feature (:or :sbcl :ecl :abcl)
   :serial t
   :components ((:file "package")
 	       (:file "util")
