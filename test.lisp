@@ -203,8 +203,10 @@
 
   (defparameter *smct* (find-method-combination-type 'smct))
   (defparameter *mmct* (find-method-combination-type 'mmct))
-  (defparameter *an-smct* (find-method-combination* 'smct :most-specific-last))
-  (defparameter *an-mmct* (find-method-combination* 'mmct :most-specific-last))
+  (defparameter *an-smct*
+    (find-method-combination* 'smct '(:most-specific-last)))
+  (defparameter *an-mmct*
+    (find-method-combination* 'mmct '(:most-specific-last)))
 
   (assert-equal (documentation 'smct 'method-combination)
 		"The SMCT method combination.")
@@ -258,10 +260,10 @@
   (assert-equal (documentation *an-smct* 'method-combination) "SMCT 2")
   (assert-equal (documentation *an-mmct* 'method-combination) "MMCT 2")
 
-  (setf (documentation (find-method-combination* 'smct :most-specific-first)
+  (setf (documentation (find-method-combination* 'smct '(:most-specific-first))
 		       t)
 	"SMCT 3")
-  (setf (documentation (find-method-combination* 'mmct :most-specific-first)
+  (setf (documentation (find-method-combination* 'mmct '(:most-specific-first))
 		       'method-combination)
 	"MMCT 3")
 
