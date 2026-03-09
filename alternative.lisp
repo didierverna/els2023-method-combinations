@@ -118,15 +118,26 @@ discriminating function."
 	  ;; be worth it however.
 	  (reinitialize-instance function :method-combination combination)
 	  (setq values (multiple-value-list (apply function arguments)))
-	  #+sbcl (setq alternative (sb-kernel::%funcallable-instance-fun function))
+	  ;; #### WARNING: ECL does not support accessing the funcallable
+	  ;; instance function from Lisp. The code below still works but
+	  ;; ALTERNATIVE will always be NIL, meaning that in effect, there is
+	  ;; no caching of alternative functions.
+	  ;; In the case of ABCL, there /is/ a discriminating function
+	  ;; accessor, but the caching is guaranteed to never work, because
+	  ;; generic functions maintain a global cache of effective methods
+	  ;; (see Section 6.2.4 of the 2018 paper).
+	  #+sbcl (setq alternative
+		       (sb-kernel::%funcallable-instance-fun function))
+	  #+(and abcl nil) (setq alternative
+				 (mop::funcallable-instance-function function))
 	  (reinitialize-instance function
 	    :method-combination default-combination)
 	  (setf (gethash combination (%functions function)) alternative)
 	  #+sbcl (sb-pcl::add-to-weak-hashset
 		  function
 		  (method-combination-%generic-functions combination))
-	  #+ecl (push function
-		      (method-combination-%generic-functions combination))
+	  #+(or ecl abcl)
+	  (push function (method-combination-%generic-functions combination))
 	  (values-list values))))))
 
 (defmacro call/cb (combination function &rest arguments)
