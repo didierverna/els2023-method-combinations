@@ -1,6 +1,8 @@
 (defpackage :els2023-method-combinations/test
   (:use :cl #+sbcl :sb-mop #+sbcl :sb-pcl #+ecl :clos #+abcl :mop
 	:els2023-method-combinations :lisp-unit)
+  (:import-from #+sbcl :sb-pcl #+ecl :clos #+abcl :mop
+		:find-method-combination-type)
   (:export :test))
 
 (in-package :els2023-method-combinations/test)
