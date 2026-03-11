@@ -9,7 +9,8 @@ proposition. This work has been described in two papers:
 
 There's a new paper on the way.
 
-The protocol itself is currently available in SBCL and more recently ECL. You
+The protocol itself is currently available in SBCL, ECL, and ABCL. You
 can find it in my forked versions of these compilers:
-- [SBCL](https://github.com/didierverna/sbcl/tree/method-combination-types).
-- [ECL](https://gitlab.com/didierverna/ecl/-/tree/mc)
+- [SBCL](https://github.com/didierverna/sbcl/tree/method-combination-types),
+- [ECL](https://gitlab.com/didierverna/ecl/-/tree/method-combination-types),
+- [ABCL](https://github.com/didierverna/abcl/tree/method-combination-types).
