@@ -148,7 +148,7 @@ discriminating function."
   (unless (consp combination) (setq combination (list combination)))
   (when (symbolp function) (setq function `(function ,function)))
   `(call-with-combination
-    (find-method-combination* ',(car combination) ',(cdr combination))
+    (find-method-combination-instance ',(car combination) ',(cdr combination))
     ,function
     ,@arguments))
 

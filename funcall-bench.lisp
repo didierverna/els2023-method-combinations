@@ -62,7 +62,7 @@
 (defun funcall-bench ()
   (let ((iterations 100000000)
 	;; Save one hash table lookup.
-	(+-combination (find-method-combination* :+)))
+	(+-combination (find-method-combination-instance :+)))
     (format *trace-output* "Timing the numerical test.~%~%")
     (format *trace-output* "Timing the raw version:~%")
     (time (dotimes (i iterations) (test1/raw 10)))
@@ -79,7 +79,7 @@
   (let ((*standard-output* (make-broadcast-stream))
 	(iterations 10000000)
 	;; Save one hash table lookup.
-	(progn-combination (find-method-combination* :progn)))
+	(progn-combination (find-method-combination-instance :progn)))
     (format *trace-output* "Timing the printing test.~%~%")
     (format *trace-output* "Timing the raw version:~%")
     (time (dotimes (i iterations) (test2/raw 10)))

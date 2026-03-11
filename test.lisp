@@ -1,8 +1,6 @@
 (defpackage :els2023-method-combinations/test
   (:use :cl #+sbcl :sb-mop #+sbcl :sb-pcl #+ecl :clos #+abcl :mop
 	:els2023-method-combinations :lisp-unit)
-  (:import-from #+sbcl :sb-pcl #+ecl :clos #+abcl :mop
-		:find-method-combination-type)
   (:export :test))
 
 (in-package :els2023-method-combinations/test)
@@ -14,18 +12,19 @@
 (define-test standard
 
   (assert-true (find-method-combination-type 'standard))
-  (assert-true (find-method-combination* 'standard))
-  (assert-error 'error (find-method-combination* 'standard '(:dummy) nil))
-  (assert-true (typep (find-method-combination* 'standard)
+  (assert-true (find-method-combination-instance 'standard))
+  (assert-error 'error
+    (find-method-combination-instance 'standard '(:dummy) nil))
+  (assert-true (typep (find-method-combination-instance 'standard)
 		      'standard-method-combination))
 
   (assert-true (find-method-combination-type 'or))
-  (assert-true (find-method-combination* 'or))
-  (assert-true (find-method-combination* 'or '(:most-specific-first)))
-  (assert-true (find-method-combination* 'or '(:most-specific-last)))
+  (assert-true (find-method-combination-instance 'or))
+  (assert-true (find-method-combination-instance 'or '(:most-specific-first)))
+  (assert-true (find-method-combination-instance 'or '(:most-specific-last)))
   ;; #### NOTE: SBCL checks the validity of the arguments. ECL doesn't.
-  ;; (assert-error 'error (find-method-combination* 'or '(:dummy)))
-  (assert-true (typep (find-method-combination* 'or)
+  ;; (assert-error 'error (find-method-combination-instance 'or '(:dummy)))
+  (assert-true (typep (find-method-combination-instance 'or)
 		      'short-method-combination))
 
   (assert-error 'error
@@ -204,9 +203,9 @@
   (defparameter *smct* (find-method-combination-type 'smct))
   (defparameter *mmct* (find-method-combination-type 'mmct))
   (defparameter *an-smct*
-    (find-method-combination* 'smct '(:most-specific-last)))
+    (find-method-combination-instance 'smct '(:most-specific-last)))
   (defparameter *an-mmct*
-    (find-method-combination* 'mmct '(:most-specific-last)))
+    (find-method-combination-instance 'mmct '(:most-specific-last)))
 
   (assert-equal (documentation 'smct 'method-combination)
 		"The SMCT method combination.")
@@ -271,10 +270,12 @@
   (assert-equal (documentation *an-smct* 'method-combination) "SMCT 2")
   (assert-equal (documentation *an-mmct* 'method-combination) "MMCT 2")
 
-  (setf (documentation (find-method-combination* 'smct '(:most-specific-first))
+  (setf (documentation (find-method-combination-instance 'smct
+			 '(:most-specific-first))
 		       t)
 	"SMCT 3")
-  (setf (documentation (find-method-combination* 'mmct '(:most-specific-first))
+  (setf (documentation (find-method-combination-instance 'mmct
+			 '(:most-specific-first))
 		       'method-combination)
 	"MMCT 3")
 
