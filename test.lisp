@@ -1,6 +1,8 @@
 (defpackage :els2023-method-combinations/test
   (:use :cl #+sbcl :sb-mop #+sbcl :sb-pcl #+ecl :clos #+abcl :mop
 	:els2023-method-combinations :lisp-unit)
+  (:import-from #+sbcl :sb-pcl #+ecl :clos #+abcl :mop
+		:method-combination-%generic-functions)
   (:export :test))
 
 (in-package :els2023-method-combinations/test)
@@ -55,6 +57,38 @@
   (assert-eql 5.0 (call/cb :+ gf 5.0))
   (assert-eql 5.0 (gf 5.0)))
 
+(define-test cache
+  (fmakunbound 'gf)
+  (defgeneric! gf (i)
+    (:method-combination :or)
+    (:method (i) i))
+  (defparameter mbr
+    #+sbcl #'sb-pcl::weak-hashset-memberp
+    #-sbcl #'member)
+
+  (assert-true (funcall mbr #'gf (method-combination-%generic-functions
+				  (find-method-combination-instance :or))))
+
+  (change-method-combination gf :and)
+
+  (assert-true (funcall mbr #'gf (method-combination-%generic-functions
+				  (find-method-combination-instance :and))))
+  (assert-false (funcall mbr #'gf (method-combination-%generic-functions
+				   (find-method-combination-instance :or))))
+
+  (call/cb :progn gf 1)
+
+  (assert-true (funcall mbr #'gf (method-combination-%generic-functions
+				  (find-method-combination-instance :and))))
+  (assert-true (funcall mbr #'gf (method-combination-%generic-functions
+				  (find-method-combination-instance :progn))))
+
+  (change-method-combination gf :progn)
+
+  (assert-true (funcall mbr #'gf (method-combination-%generic-functions
+				  (find-method-combination-instance :progn))))
+  (assert-false (funcall mbr #'gf (method-combination-%generic-functions
+				   (find-method-combination-instance :and)))))
 
 (define-test change-main-combination
   (fmakunbound 'gf)
