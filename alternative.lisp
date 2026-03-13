@@ -67,13 +67,15 @@ missing."
 	     (not (eq method-combination
 		      (generic-function-method-combination function))))
     (remhash method-combination (%functions function))
-    #+sbcl (sb-pcl::remove-from-weak-hashset
-	    function
-	    (method-combination-%generic-functions method-combination))
-    #+ecl (setf (method-combination-%generic-functions method-combination)
-		(remove function
-			(method-combination-%generic-functions
-			 method-combination))))
+    #+sbcl
+    (sb-pcl::remove-from-weak-hashset
+     function
+     (method-combination-%generic-functions method-combination))
+    #+(or ecl abcl)
+    (setf (method-combination-%generic-functions method-combination)
+	  (remove function
+		  (method-combination-%generic-functions
+		   method-combination))))
   (call-next-method))
 
 
@@ -126,16 +128,17 @@ discriminating function."
 	  ;; accessor, but the caching is guaranteed to never work, because
 	  ;; generic functions maintain a global cache of effective methods
 	  ;; (see Section 6.2.4 of the 2018 paper).
-	  #+sbcl (setq alternative
-		       (sb-kernel::%funcallable-instance-fun function))
-	  #+(and abcl nil) (setq alternative
-				 (mop::funcallable-instance-function function))
+	  #+sbcl
+	  (setq alternative (sb-kernel::%funcallable-instance-fun function))
+	  #+(and abcl nil)
+	  (setq alternative (mop::funcallable-instance-function function))
 	  (reinitialize-instance function
 	    :method-combination default-combination)
 	  (setf (gethash combination (%functions function)) alternative)
-	  #+sbcl (sb-pcl::add-to-weak-hashset
-		  function
-		  (method-combination-%generic-functions combination))
+	  #+sbcl
+	  (sb-pcl::add-to-weak-hashset
+	   function
+	   (method-combination-%generic-functions combination))
 	  #+(or ecl abcl)
 	  (push function (method-combination-%generic-functions combination))
 	  (values-list values))))))
