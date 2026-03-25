@@ -4,6 +4,7 @@
 
 (in-package :els2023-method-combinations/cem-bench)
 
+(defvar *iterations* #+abcl 100000 #-abcl 10000000)
 
 (defgeneric short-gf (a)
   (:method-combination progn)
@@ -32,15 +33,15 @@
     (format t "** Short method combination~%")
     (format t "*** 1 applicable method~%")
     (time
-     (loop :repeat 10000000
+     (loop :repeat *iterations*
 	   :do (compute-effective-method #'short-gf method-combination am1)))
     (format t "*** 3 applicable method~%")
     (time
-     (loop :repeat 10000000
+     (loop :repeat *iterations*
 	   :do (compute-effective-method #'short-gf method-combination am3)))
     (format t "*** 6 applicable method~%")
     (time
-     (loop :repeat 10000000
+     (loop :repeat *iterations*
 	   :do (compute-effective-method #'short-gf method-combination am6)))))
 
 
@@ -91,15 +92,15 @@
     (format t "** Long method combination~%")
     (format t "*** 1 applicable method~%")
     (time
-     (loop :repeat 10000000
+     (loop :repeat *iterations*
 	   :do (compute-effective-method #'long-gf method-combination am1)))
     (format t "*** 3 applicable method~%")
     (time
-     (loop :repeat 10000000
+     (loop :repeat *iterations*
 	   :do (compute-effective-method #'long-gf method-combination am3)))
     (format t "*** 6 applicable method~%")
     (time
-     (loop :repeat 10000000
+     (loop :repeat *iterations*
 	   :do (compute-effective-method #'long-gf method-combination am6)))))
 
 
