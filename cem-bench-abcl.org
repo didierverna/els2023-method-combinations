@@ -1,43 +1,43 @@
 * Original ABCL
 ** Short method combination
 *** 1 applicable method
-0.181 seconds real time
+0.144 seconds real time
 400032 cons cells
 *** 3 applicable method
-0.248 seconds real time
+0.108 seconds real time
 2300007 cons cells
 *** 6 applicable method
-0.297 seconds real time
+0.089 seconds real time
 3500007 cons cells
 ** Long method combination
 *** 1 applicable method
-12.087 seconds real time
+3.746 seconds real time
 91500032 cons cells
 *** 3 applicable method
-28.156 seconds real time
+11.641 seconds real time
 195400007 cons cells
 *** 6 applicable method
-52.262 seconds real time
+24.453 seconds real time
 349000007 cons cells
 
 * Forked ABCL
 ** Short method combination
 *** 1 applicable method
-0.579 seconds real time
+0.254 seconds real time
 2000073 cons cells
 *** 3 applicable method
-0.69 seconds real time
+0.191 seconds real time
 3900007 cons cells
 *** 6 applicable method
-0.739 seconds real time
+0.214 seconds real time
 5100007 cons cells
 ** Long method combination
 *** 1 applicable method
-12.675 seconds real time
-93100073 cons cells
+3.809 seconds real time
+92800073 cons cells
 *** 3 applicable method
-28.602 seconds real time
-197000007 cons cells
+8.608 seconds real time
+196700007 cons cells
 *** 6 applicable method
-53.188 seconds real time
-350600007 cons cells
+16.502 seconds real time
+350300007 cons cells
