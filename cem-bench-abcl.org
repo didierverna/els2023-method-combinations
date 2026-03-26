@@ -28,13 +28,13 @@ stabilizes.
 * Forked ABCL
 ** Short method combination
 *** 1 applicable method
-35.721 seconds real time
+26.95 seconds real time
 200000007 cons cells
 *** 3 applicable method
-43.489 seconds real time
+33.911 seconds real time
 390000007 cons cells
 *** 6 applicable method
-49.133 seconds real time
+39.984 seconds real time
 510000007 cons cells
 #### WARNING: dividing iterations number by 100 for ABCL.
 ** Long method combination
