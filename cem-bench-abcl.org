@@ -1,43 +1,49 @@
+### Important: do a couple of runs before collecting results. The
+first one goes much faster than the others, and then, the situation
+stabilizes.
+
 * Original ABCL
 ** Short method combination
 *** 1 applicable method
-0.144 seconds real time
-400032 cons cells
+8.675 seconds real time
+40000007 cons cells
 *** 3 applicable method
-0.108 seconds real time
-2300007 cons cells
+15.563 seconds real time
+230000007 cons cells
 *** 6 applicable method
-0.089 seconds real time
-3500007 cons cells
+18.507 seconds real time
+350000007 cons cells
+#### WARNING: dividing iterations number by 100 for ABCL.
 ** Long method combination
 *** 1 applicable method
-3.746 seconds real time
-91500032 cons cells
+4.301 seconds real time
+91500007 cons cells
 *** 3 applicable method
-11.641 seconds real time
+11.307 seconds real time
 195400007 cons cells
 *** 6 applicable method
-24.453 seconds real time
+23.41 seconds real time
 349000007 cons cells
 
 * Forked ABCL
 ** Short method combination
 *** 1 applicable method
-0.254 seconds real time
-2000073 cons cells
+35.721 seconds real time
+200000007 cons cells
 *** 3 applicable method
-0.191 seconds real time
-3900007 cons cells
+43.489 seconds real time
+390000007 cons cells
 *** 6 applicable method
-0.214 seconds real time
-5100007 cons cells
+49.133 seconds real time
+510000007 cons cells
+#### WARNING: dividing iterations number by 100 for ABCL.
 ** Long method combination
 *** 1 applicable method
-3.809 seconds real time
-92800073 cons cells
+4.496 seconds real time
+92800007 cons cells
 *** 3 applicable method
-8.608 seconds real time
+13.309 seconds real time
 196700007 cons cells
 *** 6 applicable method
-16.502 seconds real time
+26.389 seconds real time
 350300007 cons cells

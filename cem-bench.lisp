@@ -4,7 +4,7 @@
 
 (in-package :els2023-method-combinations/cem-bench)
 
-(defvar *iterations* #+abcl 100000 #-abcl 10000000)
+(defvar *iterations* 10000000)
 
 (defgeneric short-gf (a)
   (:method-combination progn)
@@ -89,19 +89,24 @@
 		(find-method #'long-gf '(progn) (list (find-class 'rational)))
 		(find-method #'long-gf '(progn) (list (find-class 'integer)))
 		(find-method #'long-gf '(progn) (list (find-class 'fixnum))))))
-    (format t "** Long method combination~%")
-    (format t "*** 1 applicable method~%")
-    (time
-     (loop :repeat *iterations*
-	   :do (compute-effective-method #'long-gf method-combination am1)))
-    (format t "*** 3 applicable method~%")
-    (time
-     (loop :repeat *iterations*
-	   :do (compute-effective-method #'long-gf method-combination am3)))
-    (format t "*** 6 applicable method~%")
-    (time
-     (loop :repeat *iterations*
-	   :do (compute-effective-method #'long-gf method-combination am6)))))
+    (let ((iterations *iterations*))
+      #+abcl
+      (progn
+	(format t "#### WARNING: dividing iterations number by 100 for ABCL.~%")
+	(setq iterations (/ *iterations* 100)))
+      (format t "** Long method combination~%")
+      (format t "*** 1 applicable method~%")
+      (time
+       (loop :repeat iterations
+	     :do (compute-effective-method #'long-gf method-combination am1)))
+      (format t "*** 3 applicable method~%")
+      (time
+       (loop :repeat iterations
+	     :do (compute-effective-method #'long-gf method-combination am3)))
+      (format t "*** 6 applicable method~%")
+      (time
+       (loop :repeat iterations
+	     :do (compute-effective-method #'long-gf method-combination am6))))))
 
 
 (defun cem-bench ()
